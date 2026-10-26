@@ -65,3 +65,5 @@ msix/*.msix
 msix/*.pfx
 msix/*.cer
 publish/msix-x64/
+
+msix/unpacked-final/
