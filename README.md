@@ -362,7 +362,8 @@ dotnet .\tests\Harness\bin\Release\net8.0-windows\Harness.dll
 全部通过
 ```
 
-详细报告：[docs/测试报告.md](docs/测试报告.md)
+详细报告：[docs/测试报告.md](docs/测试报告.md)  
+发布流程：[docs/发布流程.md](docs/发布流程.md)
 
 ---
 
