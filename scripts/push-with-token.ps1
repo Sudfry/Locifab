@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$Remote = "https://github.com/Sudfry/Locifab.git",
     [string]$Branch = "main"
 )
@@ -24,8 +24,8 @@ if ([string]::IsNullOrWhiteSpace($token)) {
 }
 
 try {
-    $authUrl = "https://x-access-token:$token@github.com/Sudfry/Locifab.git"
-    git push $authUrl "$Branch`:$Branch"
+    $authUrl = "https://x-access-token:${token}@github.com/Sudfry/Locifab.git"
+    git push $authUrl "${Branch}:${Branch}"
     if ($LASTEXITCODE -ne 0) { throw "git push 失败，退出码 $LASTEXITCODE" }
 
     git remote remove origin 2>$null | Out-Null
