@@ -1,0 +1,51 @@
+# Build outputs
+bin/
+obj/
+publish/
+
+# Local SDK / package caches used by constrained environments
+.dotnet-cli/
+.nuget/
+
+# Local app data generated during development
+.localcraft-data*/
+ui-test-data/
+publish.log
+restore.log
+buildtest.log
+.edge-pdf-check/
+pdf-page.*
+test-cjk.pdf
+focus-test.png
+*.log
+
+# Screenshots and scratch files
+screenshot-*.png
+startup-console.log
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+
+# Release archives and local caches
+Locifab-*/
+Locifab-*.zip
+old-builds/
+build-tmp/
+nuget-cache/
+offline-nuget/
+.ui-*/
+tests/harness-data/
+tests/harness-work/
+
+# Generated test data (recreate with tests/gen_testdata_10_1.py)
+tests/测试数据-10.1.17/
+tests/测试数据-10.1.17/**
+
+*.tmp
+
+# Personal documents
+Document/
+corrupt_lines.txt

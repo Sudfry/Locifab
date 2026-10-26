@@ -1,0 +1,34 @@
+<UserControl x:Class="LocalCraft.App.Controls.PathTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root">
+    <Grid>
+        <TextBox x:Name="PathInput"
+                 Style="{StaticResource InputTextBox}"
+                 TextChanged="PathInput_TextChanged"
+                 AllowDrop="True"
+                 DragOver="PathInput_DragOver"
+                 Drop="PathInput_Drop"
+                 VerticalContentAlignment="Center" />
+        <Popup x:Name="Suggestions"
+               PlacementTarget="{Binding ElementName=PathInput}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               HorizontalOffset="0"
+               VerticalOffset="3">
+            <Border Background="{DynamicResource CardBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="4"
+                    MinWidth="280"
+                    MaxHeight="260">
+                <ListBox x:Name="SuggestionList"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         SelectionChanged="SuggestionList_SelectionChanged" />
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

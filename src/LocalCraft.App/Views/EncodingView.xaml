@@ -1,0 +1,75 @@
+<UserControl x:Class="LocalCraft.App.Views.EncodingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             xmlns:services="clr-namespace:LocalCraft.App.Services"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:EncodingViewModel}">
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <Grid Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="编码与换行" Style="{StaticResource PageTitle}" />
+                <TextBlock Text="把文本文件转换为 UTF-8 / GBK，并统一 CRLF 或 LF；生成副本，不覆盖原文件。" Style="{StaticResource PageSubtitle}" />
+            </StackPanel>
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource SecondaryButton}"
+                    Command="{Binding OpenUndoCenterCommand}" Content="↩  回退中心" />
+        </Grid>
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="8" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel><TextBlock Text="源文件夹" Style="{StaticResource FieldLabel}" /><ComboBox Style="{StaticResource FolderComboBox}"
+                              IsEditable="True"
+                              Text="{Binding Folder, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{x:Static services:RecentFoldersService.Folders}"
+                              ToolTip="可直接输入路径，或从最近使用的文件夹选择" /></StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseCommand}" Content="选择" Margin="7,18,0,0" />
+                    <StackPanel Grid.Column="3"><TextBlock Text="输出文件夹" Style="{StaticResource FieldLabel}" /><ComboBox Style="{StaticResource FolderComboBox}"
+                              IsEditable="True"
+                              Text="{Binding OutputFolder, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{x:Static services:RecentFoldersService.Folders}"
+                              ToolTip="可直接输入路径，或从最近使用的文件夹选择" /></StackPanel>
+                    <Button Grid.Column="4" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseOutputCommand}" Content="选择" Margin="7,18,0,0" />
+                </Grid>
+                <Grid Margin="0,7,0,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="150" /><ColumnDefinition Width="8" /><ColumnDefinition Width="150" /><ColumnDefinition Width="8" /><ColumnDefinition Width="160" /><ColumnDefinition Width="8" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding Targets}" DisplayMemberPath="Name" SelectedItem="{Binding Target, Mode=TwoWay}" ToolTip="输出编码" />
+                    <ComboBox Grid.Column="2" Style="{StaticResource InputComboBox}" ItemsSource="{Binding Newlines}" DisplayMemberPath="Name" SelectedItem="{Binding Newline, Mode=TwoWay}" ToolTip="输出换行" />
+                    <ComboBox Grid.Column="4" Style="{StaticResource InputComboBox}" ItemsSource="{Binding SourceEncodings}" DisplayMemberPath="Name" SelectedItem="{Binding SourceEncoding, Mode=TwoWay}" ToolTip="源编码；检测错误时可手动指定" />
+                    <TextBox Grid.Column="6" Style="{StaticResource InputTextBox}" Text="{Binding Extensions, UpdateSourceTrigger=PropertyChanged}" ToolTip="扩展名过滤" />
+                    <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="8,0,0,0">
+                        <CheckBox Content="子文件夹" IsChecked="{Binding IncludeSubfolders}" Margin="0,0,8,0" />
+                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding ScanCommand}" Content="扫描预览" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <TextBlock Text="{Binding Summary}" Margin="16,12,16,8" FontSize="9.5" Foreground="{DynamicResource MutedBrush}" />
+                <DataGrid Grid.Row="1" Style="{StaticResource PreviewDataGrid}" ItemsSource="{Binding Rows}" Margin="8,0,8,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="文件" Binding="{Binding FileName}" Width="1.1*" />
+                        <DataGridTextColumn Header="检测编码" Binding="{Binding EncodingName}" Width="110" />
+                        <DataGridTextColumn Header="输出" Binding="{Binding OutputPath}" Width="1.6*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Grid Grid.Row="2" Margin="16,10,16,12">
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding ExecuteCommand}" Content="执行编码转换" HorizontalAlignment="Left" />
+                    <ProgressBar Width="220" Height="4" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"
+                                 IsIndeterminate="{Binding IsProgressIndeterminate}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </Border>
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="0,10,0,0"
+                Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="{Binding ResultTitle}" FontWeight="SemiBold" FontSize="11" />
+                <TextBlock Text="{Binding ResultMessage}" FontSize="10" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

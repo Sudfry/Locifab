@@ -1,0 +1,422 @@
+[
+  {
+    "toolKey": "rename",
+    "name": "交付前缀+序号",
+    "values": {
+      "Prefix": "交付_",
+      "Suffix": "",
+      "StartNumberText": "1",
+      "NumberPaddingText": "3",
+      "NumberSeparator": "_",
+      "UseNumbering": "True"
+    },
+    "step": {
+      "kind": "Rename",
+      "name": "批量重命名",
+      "enabled": true,
+      "text1": "交付_",
+      "text2": "",
+      "text3": "_",
+      "number1": 1,
+      "number2": 3,
+      "choice": "",
+      "bool1": true,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "imgcompress",
+    "name": "图片500KB",
+    "values": {
+      "TargetKb": "500",
+      "ImageFolder": "",
+      "ImageOutput": ""
+    },
+    "step": {
+      "kind": "ImageTarget",
+      "name": "图片目标压缩",
+      "enabled": true,
+      "text1": "图片压缩",
+      "text2": "",
+      "text3": "",
+      "number1": 500,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "imgcheck",
+    "name": "损坏隔离",
+    "values": {
+      "IntegrityFolder": ""
+    },
+    "step": {
+      "kind": "ImageCheck",
+      "name": "图片完整性",
+      "enabled": true,
+      "text1": "损坏图片隔离",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "embedimg",
+    "name": "Office素材",
+    "values": {
+      "OfficeFolder": "",
+      "OfficeOutput": ""
+    },
+    "step": {
+      "kind": "EmbeddedImages",
+      "name": "内嵌图片提取",
+      "enabled": true,
+      "text1": "内嵌图片",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "convert",
+    "name": "转PDF",
+    "values": {
+      "OutputDirectory": "",
+      "TargetFormat": "pdf"
+    },
+    "step": {
+      "kind": "Convert",
+      "name": "格式转换",
+      "enabled": true,
+      "text1": "转换结果",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "pdf",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "findrep",
+    "name": "旧项目名替换",
+    "values": {
+      "FindText": "旧项目名",
+      "ReplaceText": "新项目名",
+      "AnyExtension": "True",
+      "IncludeExtensions": ""
+    },
+    "step": {
+      "kind": "TextReplace",
+      "name": "文本替换",
+      "enabled": true,
+      "text1": "旧项目名",
+      "text2": "新项目名",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "metadata",
+    "name": "隐私副本",
+    "values": {
+      "OutputFolder": ""
+    },
+    "step": {
+      "kind": "Metadata",
+      "name": "元数据清理",
+      "enabled": true,
+      "text1": "去元数据",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "checksum",
+    "name": "SHA-256清单",
+    "values": {
+      "ManifestPath": ""
+    },
+    "step": {
+      "kind": "Checksum",
+      "name": "SHA-256 校验",
+      "enabled": true,
+      "text1": "Locifab-SHA256.txt",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "SHA-256",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "report",
+    "name": "清单CSV哈希",
+    "values": {
+      "OutputPath": "",
+      "IncludeHash": "True"
+    },
+    "step": {
+      "kind": "Report",
+      "name": "清单报告",
+      "enabled": true,
+      "text1": "文件夹清单.csv",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "Csv",
+      "bool1": true,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "classify",
+    "name": "按类型分类",
+    "values": {
+      "FolderPath": ""
+    },
+    "step": {
+      "kind": "Classify",
+      "name": "分类移动",
+      "enabled": true,
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "ByType",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "backup",
+    "name": "只增备份",
+    "values": {
+      "SourceFolder": "",
+      "TargetFolder": ""
+    },
+    "step": {
+      "kind": "Backup",
+      "name": "备份副本",
+      "enabled": true,
+      "text1": "备份",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "dedup",
+    "name": "精确去重隔离",
+    "values": {
+      "QuarantineDirectory": ""
+    },
+    "step": {
+      "kind": "Dedup",
+      "name": "内容去重",
+      "enabled": true,
+      "text1": "重复隔离",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "photos",
+    "name": "相似照片92%",
+    "values": {
+      "QuarantineDirectory": "",
+      "ThresholdPercent": "92"
+    },
+    "step": {
+      "kind": "PhotoDedup",
+      "name": "相似照片",
+      "enabled": true,
+      "text1": "相似照片隔离",
+      "text2": "",
+      "text3": "",
+      "number1": 92,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "images",
+    "name": "图片批处理1920",
+    "values": {
+      "OutputFolder": "",
+      "SizeValue": "1920",
+      "JpegQuality": "88"
+    },
+    "step": {
+      "kind": "ImageBatch",
+      "name": "图片批处理",
+      "enabled": true,
+      "text1": "图片输出",
+      "text2": "",
+      "text3": "",
+      "number1": 1920,
+      "number2": 88,
+      "choice": "Keep",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "archive",
+    "name": "ZIP压缩",
+    "values": {
+      "Password": "",
+      "IsCompress": "True"
+    },
+    "step": {
+      "kind": "Archive",
+      "name": "ZIP 处理",
+      "enabled": true,
+      "text1": "Locifab-归档.zip",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "Compress",
+      "bool1": true,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "template",
+    "name": "客户交付目录",
+    "values": {
+      "Template": "客户/\n  合同/\n  交付物/\n  验收/\n交付说明.md"
+    },
+    "step": {
+      "kind": "Template",
+      "name": "目录模板",
+      "enabled": true,
+      "text1": "客户/|合同/|交付物/|验收/|交付说明.md",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "filestate",
+    "name": "统一修改时间",
+    "values": {
+      "FixedTime": "2026-01-01 09:00:00",
+      "SetReadOnly": "False",
+      "SetHidden": "False"
+    },
+    "step": {
+      "kind": "FileState",
+      "name": "时间与属性",
+      "enabled": true,
+      "text1": "2026-01-01 09:00:00",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "splitmerge",
+    "name": "按10MB拆分",
+    "values": {
+      "OutputFolder": "",
+      "SizeMb": "10"
+    },
+    "step": {
+      "kind": "SplitMerge",
+      "name": "拆分与合并",
+      "enabled": true,
+      "text1": "拆分合并结果",
+      "text2": "",
+      "text3": "",
+      "number1": 10,
+      "number2": 0,
+      "choice": "Split",
+      "bool1": false,
+      "bool2": false,
+      "templateName": ""
+    }
+  },
+  {
+    "toolKey": "cleanup",
+    "name": "空目录清理",
+    "values": {
+      "Folder": ""
+    },
+    "step": {
+      "kind": "Cleanup",
+      "name": "清理空目录",
+      "enabled": true,
+      "text1": "",
+      "text2": "",
+      "text3": "",
+      "number1": 0,
+      "number2": 0,
+      "choice": "",
+      "bool1": true,
+      "bool2": true,
+      "templateName": ""
+    }
+  }
+]

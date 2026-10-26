@@ -1,0 +1,523 @@
+<UserControl x:Class="LocalCraft.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,8,0">
+            <Grid Margin="0,0,0,14">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="设置" Style="{StaticResource PageTitle}" />
+                        <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="8,3"
+                                Margin="12,2,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="偏好与常用设置" FontSize="9" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentBrush}" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="这里的改动会自动保存到本机。带「默认」的设置影响下一次任务。"
+                               Style="{StaticResource PageSubtitle}" />
+                </StackPanel>
+                <TextBlock Text="{Binding StatusText}" FontSize="10.5"
+                           Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Right"
+                           VerticalAlignment="Bottom" Margin="0,0,2,5" />
+            </Grid>
+
+            <!-- Appearance -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="外观" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="冷色主题、主题色、密度与侧栏宽度，修改后立即生效。"
+                                       FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" Background="{DynamicResource SuccessSoftBrush}"
+                                CornerRadius="6" Padding="8,3" VerticalAlignment="Top">
+                            <TextBlock Text="本机保存" FontSize="9" Foreground="{DynamicResource SuccessBrush}" />
+                        </Border>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="1.35*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="主题" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}"
+                                      ItemsSource="{Binding ThemeOptions}"
+                                      ItemTemplate="{StaticResource DisplayNameOptionTemplate}"
+                                      SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="主题色" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}"
+                                      ItemsSource="{Binding AccentOptions}"
+                                      ItemTemplate="{StaticResource DisplayNameOptionTemplate}"
+                                      SelectedItem="{Binding SelectedAccent, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="界面密度" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}"
+                                      ItemsSource="{Binding DensityOptions}"
+                                      ItemTemplate="{StaticResource DisplayNameOptionTemplate}"
+                                      SelectedItem="{Binding SelectedDensity, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="6">
+                            <Grid>
+                                <TextBlock Text="侧栏宽度" Style="{StaticResource FieldLabel}" />
+                                <TextBlock Text="{Binding SidebarWidthLabel}" FontSize="10"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           HorizontalAlignment="Right" Margin="0,0,1,6" />
+                            </Grid>
+                            <Slider Minimum="200" Maximum="300" TickFrequency="8"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding SidebarWidth, Mode=TwoWay}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Sidebar category colors -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="侧栏分类颜色" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="左侧工具按分类着色，颜色立即生效并保存到本机。"
+                                       FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                    <UniformGrid Columns="5">
+                        <StackPanel Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Border Width="10" Height="10" CornerRadius="3" Background="{Binding SelectedFileColor.Brush}" />
+                                <TextBlock Text="文件整理" Style="{StaticResource FieldLabel}" Margin="6,0,0,0" />
+                            </StackPanel>
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding CategoryColors}"
+                                      SelectedItem="{Binding SelectedFileColor, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="10" Height="10" CornerRadius="3" Background="{Binding Brush}" />
+                                            <TextBlock Text="{Binding Name}" Margin="7,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="4,0,4,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Border Width="10" Height="10" CornerRadius="3" Background="{Binding SelectedTextColor.Brush}" />
+                                <TextBlock Text="文本内容" Style="{StaticResource FieldLabel}" Margin="6,0,0,0" />
+                            </StackPanel>
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding CategoryColors}"
+                                      SelectedItem="{Binding SelectedTextColor, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="10" Height="10" CornerRadius="3" Background="{Binding Brush}" />
+                                            <TextBlock Text="{Binding Name}" Margin="7,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="4,0,4,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Border Width="10" Height="10" CornerRadius="3" Background="{Binding SelectedMediaColor.Brush}" />
+                                <TextBlock Text="图片媒体" Style="{StaticResource FieldLabel}" Margin="6,0,0,0" />
+                            </StackPanel>
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding CategoryColors}"
+                                      SelectedItem="{Binding SelectedMediaColor, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="10" Height="10" CornerRadius="3" Background="{Binding Brush}" />
+                                            <TextBlock Text="{Binding Name}" Margin="7,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="4,0,4,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Border Width="10" Height="10" CornerRadius="3" Background="{Binding SelectedWorkflowColor.Brush}" />
+                                <TextBlock Text="效率工具" Style="{StaticResource FieldLabel}" Margin="6,0,0,0" />
+                            </StackPanel>
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding CategoryColors}"
+                                      SelectedItem="{Binding SelectedWorkflowColor, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="10" Height="10" CornerRadius="3" Background="{Binding Brush}" />
+                                            <TextBlock Text="{Binding Name}" Margin="7,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="8,0,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Border Width="10" Height="10" CornerRadius="3" Background="{Binding SelectedSystemColor.Brush}" />
+                                <TextBlock Text="系统维护" Style="{StaticResource FieldLabel}" Margin="6,0,0,0" />
+                            </StackPanel>
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding CategoryColors}"
+                                      SelectedItem="{Binding SelectedSystemColor, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="10" Height="10" CornerRadius="3" Background="{Binding Brush}" />
+                                            <TextBlock Text="{Binding Name}" Margin="7,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Sidebar badges -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="侧栏右侧小字" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="修改每个工具右侧的徽标文字；清空后恢复默认。"
+                                       FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                    <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding BadgeItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,9,7">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="118" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Title}" FontSize="10.5"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource InkSoftBrush}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBox Grid.Column="1" Style="{StaticResource InputTextBox}"
+                                                 Text="{Binding Text, UpdateSourceTrigger=LostFocus}"
+                                                 FontSize="10.5" Padding="8,4" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- Frequently used -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="常用设置" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="最常调整的选项，打开就能用。" FontSize="10"
+                                       Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" Background="{DynamicResource AccentSoftBrush}"
+                                CornerRadius="6" Padding="8,3" VerticalAlignment="Top">
+                            <TextBlock Text="即时生效" FontSize="9" Foreground="{DynamicResource AccentBrush}" />
+                        </Border>
+                    </Grid>
+
+                    <UniformGrid Columns="3">
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="0,0,8,0">
+                            <StackPanel>
+                                <CheckBox Content="启用界面动画"
+                                          IsChecked="{Binding AnimationsEnabled, Mode=TwoWay}"
+                                          FontWeight="SemiBold" />
+                                <TextBlock Text="页面切换、提示入场与按压缩放。关闭后立即减少动效。"
+                                           FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap" Margin="24,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="4,0,4,0">
+                            <StackPanel>
+                                <CheckBox Content="记住最后打开的页面"
+                                          IsChecked="{Binding RememberLastPage, Mode=TwoWay}"
+                                          FontWeight="SemiBold" />
+                                <TextBlock Text="下次启动自动回到上次使用的模块。"
+                                           FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap" Margin="24,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="8,0,0,0">
+                            <StackPanel>
+                                <CheckBox Content="默认包含子文件夹"
+                                          IsChecked="{Binding DefaultIncludeSubfolders, Mode=TwoWay}"
+                                          FontWeight="SemiBold" />
+                                <TextBlock Text="重命名、转换、去重、分类的新任务默认扫描子文件夹。"
+                                           FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap" Margin="24,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <UniformGrid Columns="2" Margin="0,8,0,0">
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="0,0,6,0">
+                            <StackPanel>
+                                <CheckBox Content="显示侧栏右侧小字"
+                                          IsChecked="{Binding ShowSidebarBadges, Mode=TwoWay}"
+                                          FontWeight="SemiBold" />
+                                <TextBlock Text="关闭后隐藏工具右侧的徽标，界面更简洁。"
+                                           FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap" Margin="24,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="6,0,0,0">
+                            <StackPanel>
+                                <CheckBox Content="侧栏按分类着色"
+                                          IsChecked="{Binding ShowSidebarColors, Mode=TwoWay}"
+                                          FontWeight="SemiBold" />
+                                <TextBlock Text="关闭后所有工具使用统一的石墨色，减少视觉干扰。"
+                                           FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap" Margin="24,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="0,8,6,0">
+                            <StackPanel>
+                                <CheckBox Content="启动时打开功能说明"
+                                          IsChecked="{Binding StartOnGuide, Mode=TwoWay}"
+                                          FontWeight="SemiBold" />
+                                <TextBlock Text="每次启动先展示每个工具的用途和例子。"
+                                           FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap" Margin="24,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10"
+                                Padding="13,11" Margin="6,8,0,0">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="侧栏工具名字号" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding SidebarFontSizeLabel}" FontSize="9.5"
+                                               Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Slider Minimum="10" Maximum="15" TickFrequency="0.5"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding SidebarFontSize, Mode=TwoWay}"
+                                        Margin="0,5,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="首页常用功能" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="最多选择 6 个工具，显示在“开始使用”页；也可以直接在首页拖入工具。"
+                                       FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                    <UniformGrid Columns="3">
+                        <StackPanel Margin="0,0,8,8">
+                            <TextBlock Text="常用 1" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding HomeFavoriteOptions}"
+                                      SelectedItem="{Binding HomeFavorite1, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="4,0,4,8">
+                            <TextBlock Text="常用 2" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding HomeFavoriteOptions}"
+                                      SelectedItem="{Binding HomeFavorite2, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="8,0,0,8">
+                            <TextBlock Text="常用 3" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding HomeFavoriteOptions}"
+                                      SelectedItem="{Binding HomeFavorite3, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="常用 4" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding HomeFavoriteOptions}"
+                                      SelectedItem="{Binding HomeFavorite4, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="4,0,4,0">
+                            <TextBlock Text="常用 5" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding HomeFavoriteOptions}"
+                                      SelectedItem="{Binding HomeFavorite5, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="8,0,0,0">
+                            <TextBlock Text="常用 6" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding HomeFavoriteOptions}"
+                                      SelectedItem="{Binding HomeFavorite6, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.15*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Motion -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="动效" FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="选择动画强度，并在本机预览。" FontSize="10"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,12" />
+
+                        <TextBlock Text="动效等级" Style="{StaticResource FieldLabel}" />
+                        <ComboBox Style="{StaticResource InputComboBox}"
+                                  ItemsSource="{Binding MotionLevels}"
+                                  ItemTemplate="{StaticResource DisplayNameOptionTemplate}"
+                                  SelectedItem="{Binding SelectedMotionLevel, Mode=TwoWay}"
+                                  Margin="0,0,0,6" />
+                        <TextBlock Text="{Binding SelectedMotionLevel.Description}" FontSize="9.5"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="1,0,0,12" />
+
+                        <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="10" Padding="12,10">
+                            <StackPanel>
+                                <Grid Height="26">
+                                    <Border Background="{DynamicResource ProgressTrackBrush}" CornerRadius="13" />
+                                    <Border x:Name="PreviewMotionBar" HorizontalAlignment="Left"
+                                            Width="150" Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="13">
+                                        <TextBlock Text="动效预览" FontSize="9.5" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+                                <Button Style="{StaticResource GhostButton}"
+                                        Click="PreviewMotion_Click"
+                                        Content="播放预览" HorizontalAlignment="Left" Margin="0,7,0,0"
+                                        FontSize="10.5" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="关闭动画后，页面切换和提示入场会立即变为无动画。"
+                                   FontSize="9.5" Foreground="{DynamicResource MutedBrush}"
+                                   TextWrapping="Wrap" Margin="0,10,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Defaults -->
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="处理默认值" FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="为下一次任务预设常用参数。" FontSize="10"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,12" />
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="去重相似度阈值" Style="{StaticResource FieldLabel}"
+                                       VerticalAlignment="Center" Margin="0" />
+                            <TextBlock Grid.Column="1" Text="{Binding DedupThresholdLabel}"
+                                       FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentBrush}" />
+                        </Grid>
+                        <Slider Minimum="50" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"
+                                Value="{Binding DedupThreshold, Mode=TwoWay}" Margin="0,0,0,14" />
+
+                        <TextBlock Text="分类默认方式" Style="{StaticResource FieldLabel}" />
+                        <ComboBox Style="{StaticResource InputComboBox}"
+                                  ItemsSource="{Binding ClassificationModes}"
+                                  ItemTemplate="{StaticResource DisplayNameOptionTemplate}"
+                                  SelectedItem="{Binding SelectedClassificationMode, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Storage -->
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <TextBlock Text="存储与维护" FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="完全本机 · 不联网" FontSize="9.5"
+                                   Foreground="{DynamicResource SuccessBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <TextBlock Text="设置文件" Style="{StaticResource FieldLabel}" />
+                    <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="7" Padding="10,7">
+                        <TextBlock Text="{Binding SettingsFilePath}" FontSize="10"
+                                   Foreground="{DynamicResource InkSoftBrush}" TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding SettingsFilePath}" />
+                    </Border>
+
+                    <TextBlock Text="本机数据目录" Style="{StaticResource FieldLabel}" Margin="0,10,0,6" />
+                    <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="7" Padding="10,7">
+                        <TextBlock Text="{Binding DataRoot}" FontSize="10"
+                                   Foreground="{DynamicResource InkSoftBrush}" TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding DataRoot}" />
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,13,0,0">
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Command="{Binding OpenDataFolderCommand}" Content="打开数据目录"
+                                Margin="0,0,7,0" />
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Command="{Binding OpenSettingsFileCommand}" Content="查看设置文件"
+                                Margin="0,0,7,0" />
+                        <Button Style="{StaticResource GhostButton}"
+                                Command="{Binding ResetCommand}" Content="恢复默认设置"
+                                Foreground="{DynamicResource DangerBrush}" FontSize="10.5" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- About / author -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="关于作者" FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="Sudfry · Locifab 开源仓库" FontSize="10.5"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0" />
+                        <TextBlock Text="https://github.com/Sudfry/Locifab" FontSize="10"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding OpenGithubCommand}" Content="打开 GitHub"
+                            VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

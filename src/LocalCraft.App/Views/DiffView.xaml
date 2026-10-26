@@ -1,0 +1,60 @@
+<UserControl x:Class="LocalCraft.App.Views.DiffView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             xmlns:text="clr-namespace:LocalCraft.Core.Text;assembly=LocalCraft.Core"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:DiffViewModel}">
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="文本差异" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="逐行比较两个文本文件，标出新增和删除；只读，不上传。" Style="{StaticResource PageSubtitle}" />
+        </StackPanel>
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="8" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="文件 A" Style="{StaticResource FieldLabel}" />
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding LeftPath, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseLeftCommand}" Content="选择"
+                        Margin="7,0,0,0" VerticalAlignment="Bottom" />
+                <StackPanel Grid.Column="3">
+                    <TextBlock Text="文件 B" Style="{StaticResource FieldLabel}" />
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding RightPath, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <Button Grid.Column="4" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseRightCommand}" Content="选择"
+                        Margin="7,0,0,0" VerticalAlignment="Bottom" />
+                <Button Grid.Column="5" Style="{StaticResource PrimaryButton}" Command="{Binding CompareCommand}" Content="开始对比" Margin="9,18,0,0" />
+            </Grid>
+        </Border>
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                <TextBlock Text="{Binding Summary}" Margin="16,12,16,8" FontSize="9.5" Foreground="{DynamicResource MutedBrush}" />
+                <DataGrid Grid.Row="1" Style="{StaticResource PreviewDataGrid}" ItemsSource="{Binding Rows}" Margin="8,0,8,8">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="" Binding="{Binding Marker}" Width="30" />
+                        <DataGridTextColumn Header="A 行" Binding="{Binding OldNumber}" Width="55" />
+                        <DataGridTextColumn Header="B 行" Binding="{Binding NewNumber}" Width="55" />
+                        <DataGridTextColumn Header="内容" Binding="{Binding Text}" Width="*" />
+                    </DataGrid.Columns>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static text:DiffKind.Added}">
+                                    <Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static text:DiffKind.Removed}">
+                                    <Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

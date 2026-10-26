@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Locifab 扩展工具</title>
+<style>
+:root{--bg:#171717;--card:#232323;--card2:#2b2b2b;--line:#383838;--text:#f1ede5;--muted:#9b9b9b;--gold:#d6a05e;--ok:#5ec08a;--warn:#e0a34a;--bad:#e06c6c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 "Microsoft YaHei UI","Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:22px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#171717f2;backdrop-filter:blur(8px);z-index:2}
+header h1{font-size:22px;margin:0;font-weight:650}header .sub{color:var(--muted);font-size:12px;margin-top:3px}
+header .grow{flex:1}.dirbar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+button{font:inherit;border:1px solid var(--line);background:var(--card2);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--gold);background:#343434}button.primary{background:#b97f3f;border-color:#d6a05e;color:#fff}button.primary:hover{background:#c98c48}
+button:disabled{opacity:.5;cursor:not-allowed}input,select,textarea{font:inherit;color:var(--text);background:#1b1b1b;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+input[type=file]{padding:6px}input[type=checkbox]{width:auto;accent-color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:22px 28px 40px;max-width:1500px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px}.card h2{font-size:15px;margin:0 0 3px}.card p{color:var(--muted);font-size:12px;margin:0 0 12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.row>*{flex:0 0 auto}.row input[type=file]{flex:1 1 210px}
+label.small{font-size:11px;color:var(--muted)}.field{display:flex;flex-direction:column;gap:3px;min-width:90px;flex:1}.field input,.field select{width:100%}
+.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:8px;white-space:pre-wrap}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:500}
+.scroll{max-height:260px;overflow:auto}.mono{font-family:Consolas,ui-monospace,monospace}.diff-add{background:#183425}.diff-del{background:#3a2020}.diff-same{color:#bdbdbd}
+.hint{font-size:11px;color:var(--muted);margin-top:6px}.danger{color:var(--bad)}
+@media(max-width:900px){.grid{grid-template-columns:1fr;padding:16px}header{padding:16px;align-items:flex-start;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Locifab 扩展工具</h1><div class="sub">图片 · 拆分合并 · 校验清单 · 编码 · 差异 · 模板 · 相似照片</div></div>
+  <div class="grow"></div>
+  <div class="dirbar"><span id="dirLabel">输出：未选择文件夹（将逐个下载）</span><button id="pickDir">选择输出文件夹</button><button id="undoOutputs" title="删除本次写入输出文件夹的文件">撤销本次输出</button></div>
+</header>
+
+<div class="grid">
+  <section class="card">
+    <h2>图片缩放 / 转换</h2><p>浏览器内重新编码，默认移除 EXIF；输出到本地文件夹。</p>
+    <input id="imgFiles" type="file" accept="image/*" multiple>
+    <div class="row">
+      <div class="field"><label class="small">最大边（px）</label><input id="imgMax" type="number" value="1600" min="64"></div>
+      <div class="field"><label class="small">格式</label><select id="imgFormat"><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></div>
+      <div class="field"><label class="small">JPEG 质量</label><input id="imgQuality" type="number" value="88" min="1" max="100"></div>
+    </div>
+    <button class="primary" id="imgRun">处理图片</button><div class="status" id="imgStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>图片拼接长图</h2><p>纵向或横向拼接，原图不修改。</p>
+    <input id="stitchFiles" type="file" accept="image/*" multiple>
+    <div class="row">
+      <div class="field"><label class="small">方向</label><select id="stitchDir"><option value="v">纵向</option><option value="h">横向</option></select></div>
+      <div class="field"><label class="small">间距</label><input id="stitchGap" type="number" value="8" min="0"></div>
+      <div class="field"><label class="small">背景色</label><input id="stitchBg" type="color" value="#ffffff"></div>
+      <div class="field"><label class="small">最大宽/高</label><input id="stitchMax" type="number" value="1600" min="64"></div>
+    </div>
+    <button class="primary" id="stitchRun">生成拼接图</button><div class="status" id="stitchStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>隐私元数据清理</h2><p>图片重新编码，不保留 EXIF；适合 JPG/PNG/WebP。</p>
+    <input id="metaFiles" type="file" accept="image/*" multiple>
+    <div class="row"><button class="primary" id="metaRun">生成无元数据副本</button></div>
+    <div class="status" id="metaStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>相似照片</h2><p>64 位 dHash 画面比较，只读分析，不删除文件。</p>
+    <input id="photoFiles" type="file" accept="image/*" multiple>
+    <div class="row"><div class="field"><label class="small">相似度阈值 %</label><input id="photoThreshold" type="number" value="92" min="70" max="100"></div><button class="primary" id="photoRun">扫描相似组</button></div>
+    <div class="status" id="photoStatus"></div><div id="photoResult" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>文件拆分 / 合并</h2><p>拆分生成分片；合并按文件名顺序。原文件不删除。</p>
+    <input id="splitFile" type="file">
+    <div class="row"><div class="field"><label class="small">每片 MB</label><input id="splitSize" type="number" value="5" min="0.1" step="0.1"></div><button id="splitRun">拆分</button></div>
+    <input id="mergeFiles" type="file" multiple>
+    <div class="row"><button id="mergeRun">合并选中分片</button></div>
+    <div class="status" id="splitStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>校验与文件夹清单</h2><p>SHA-256 完整性校验；可导出 CSV。</p>
+    <input id="hashFiles" type="file" multiple>
+    <input id="hashDir" type="file" webkitdirectory multiple>
+    <div class="row"><button class="primary" id="hashRun">计算 SHA-256</button><button id="hashCsv">导出 CSV</button><button id="hashManifest">生成清单</button></div>
+    <input id="manifestFile" type="file" accept=".sha256,.txt">
+    <div class="row"><button id="hashVerify">验证清单</button><button id="hashHtml">导出 HTML 报告</button></div>
+    <div class="status" id="hashStatus"></div><div id="hashResult" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>编码 / 换行</h2><p>UTF-8 与 BOM、CRLF/LF 转换；生成副本。GBK 输入会自动识别。</p>
+    <input id="encFiles" type="file" accept=".txt,.md,.csv,.json,.xml,.html,.css,.js,.cs,.log,.ini,.yml,.yaml" multiple>
+    <div class="row">
+      <div class="field"><label class="small">输出编码</label><select id="encTarget"><option value="utf8">UTF-8 无 BOM</option><option value="utf8bom">UTF-8 带 BOM</option></select></div>
+      <div class="field"><label class="small">换行</label><select id="encNewline"><option value="keep">保持</option><option value="crlf">CRLF</option><option value="lf">LF</option></select></div>
+    </div>
+    <button class="primary" id="encRun">转换编码</button><div class="status" id="encStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>文本差异</h2><p>逐行对比，只读，不上传。</p>
+    <input id="diffA" type="file" accept=".txt,.md,.csv,.json,.xml,.log,.cs,.js,.html,.css,.ini,.yml,.yaml">
+    <input id="diffB" type="file" accept=".txt,.md,.csv,.json,.xml,.log,.cs,.js,.html,.css,.ini,.yml,.yaml">
+    <div class="row"><button class="primary" id="diffRun">开始对比</button></div>
+    <div class="status" id="diffStatus"></div><div id="diffResult" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>ZIP 压缩 / 解压</h2><p>浏览器内生成/读取 ZIP；解压需要先选择输出文件夹。路径会做安全过滤。</p>
+    <input id="zipFiles" type="file" multiple>
+    <input id="zipDir" type="file" webkitdirectory multiple>
+    <div class="row"><button class="primary" id="zipRun">压缩为 ZIP</button></div>
+    <input id="zipInput" type="file" accept=".zip">
+    <div class="row"><button id="zipPreview">预览 ZIP</button><button id="zipExtract">解压到输出文件夹</button></div>
+    <div class="status" id="zipStatus"></div><div id="zipList" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>空目录 / 零字节清理</h2><p>需要 Edge/Chrome 并授权目录。先扫描预览，再确认删除；不会碰非空目录和非零文件。</p>
+    <div class="row"><button id="cleanPick">选择扫描文件夹</button><button class="primary" id="cleanScan">扫描</button><button id="cleanDelete">清理选中</button></div>
+    <div class="status" id="cleanStatus"></div><div id="cleanResult" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>时间与属性（本地桥接）</h2><p>通过本地桥接修改 Windows 时间戳/文件属性；先预览，执行后可回退。需要后端窗口运行。</p>
+    <input id="stateFolder" placeholder="C:\要处理的文件夹">
+    <div class="row">
+      <label class="small"><input id="stateRecursive" type="checkbox" checked> 包含子文件夹</label>
+      <div class="field"><label class="small">模式</label><select id="stateMode"><option value="timestamps">时间戳</option><option value="attributes">文件属性</option></select></div>
+    </div>
+    <div id="stateTimeFields">
+      <div class="row">
+        <div class="field"><label class="small">时间方式</label><select id="stateTimeMode"><option value="fixed">指定时间</option><option value="offset">按天偏移</option></select></div>
+        <div class="field"><label class="small">指定时间</label><input id="stateFixedTime" type="datetime-local"></div>
+        <div class="field"><label class="small">偏移天数</label><input id="stateOffset" type="number" value="0" step="1"></div>
+      </div>
+      <div class="row"><label class="small"><input id="stateCreated" type="checkbox"> 创建时间</label><label class="small"><input id="stateModified" type="checkbox" checked> 修改时间</label><label class="small"><input id="stateAccessed" type="checkbox"> 访问时间</label></div>
+    </div>
+    <div id="stateAttrFields" hidden>
+      <div class="row"><label class="small"><input id="stateReadOnly" type="checkbox"> 只读</label><label class="small"><input id="stateHidden" type="checkbox"> 隐藏</label><label class="small"><input id="stateArchive" type="checkbox"> 存档</label><label class="small"><input id="stateRemove" type="checkbox"> 移除勾选属性</label></div>
+    </div>
+    <div class="row"><button class="primary" id="statePreview">预览</button><button id="stateApply">执行</button><button id="stateUndo">回退最近一次</button></div>
+    <div class="status" id="stateStatus"></div><div id="stateResult" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>任务流水线</h2><p>把 ZIP 和 SHA-256 审计串成一条本地任务；输出到本地文件夹。</p>
+    <input id="pipeFiles" type="file" multiple>
+    <div class="row">
+      <label class="small"><input id="pipeZip" type="checkbox" checked> ZIP 压缩</label>
+      <label class="small"><input id="pipeHash" type="checkbox" checked> SHA-256 报告</label>
+      <button class="primary" id="pipeRun">执行流水线</button>
+    </div>
+    <div class="status" id="pipeStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>导出与排版</h2><p>把文本导出为 Markdown / HTML / Word（HTML 兼容格式）；PDF 使用浏览器打印。</p>
+    <textarea id="exportText" rows="6" class="mono">Locifab 导出测试
+
+这是第一段。
+这是第二段。</textarea>
+    <div class="row">
+      <div class="field"><label class="small">格式</label><select id="exportFormat"><option value="md">Markdown</option><option value="html">HTML</option><option value="doc">Word .doc</option><option value="pdf">打印 / PDF</option></select></div>
+      <button class="primary" id="exportRun">导出</button>
+    </div>
+    <div class="status" id="exportStatus"></div>
+  </section>
+
+  <section class="card">
+    <h2>全局搜索</h2><p>在当前浏览器可读的文件夹内按名称/相对路径过滤，只读，不上传。</p>
+    <input id="searchDir" type="file" webkitdirectory multiple>
+    <div class="row"><div class="field"><label class="small">关键词 / 通配符</label><input id="searchPattern" placeholder="例如 报告 或 *.pdf"></div><button class="primary" id="searchRun">搜索</button></div>
+    <div class="status" id="searchStatus"></div><div id="searchResult" class="scroll"></div>
+  </section>
+
+  <section class="card">
+    <h2>目录模板</h2><p>每行一个路径，<code>/</code> 结尾创建文件夹，其余创建空文件。需要先选择输出文件夹。</p>
+    <textarea id="tplText" rows="7" class="mono">项目/
+项目/文档/
+项目/素材/
+项目/说明.md</textarea>
+    <div class="row"><button class="primary" id="tplRun">创建目录结构</button></div>
+    <div class="status" id="tplStatus"></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let dirHandle = null;
+let outFiles = [];
+const used = new Set();
+const enc = new TextEncoder();
+const decUtf8 = new TextDecoder('utf-8');
+
+$('#pickDir').onclick = async () => {
+  try {
+    if (!window.showDirectoryPicker) throw new Error('当前浏览器不支持文件夹写入，将改为逐个下载。');
+    dirHandle = await window.showDirectoryPicker({mode:'readwrite'});
+    $('#dirLabel').textContent = '输出：' + dirHandle.name;
+    used.clear(); outFiles = [];
+  } catch (e) { alert(e.message || e); }
+};
+
+$('#undoOutputs').onclick = async () => {
+  if (!dirHandle) return alert('未选择输出文件夹，下载的文件需要手动删除。');
+  if (!outFiles.length) return alert('本次没有可撤销的输出。');
+  if (!confirm(`删除本次写入的 ${outFiles.length} 个文件？`)) return;
+  let done = 0;
+  for (const name of [...outFiles].reverse()) {
+    try { await dirHandle.removeEntry(name); done++; } catch (e) {}
+  }
+  outFiles = [];
+  alert(`已删除 ${done} 个文件。`);
+};
+
+function baseName(name){ return name.replace(/\.[^.]+$/, ''); }
+function extName(name){ const i=name.lastIndexOf('.'); return i>0 ? name.slice(i) : ''; }
+function uniqueName(name){
+  let out=name, i=2;
+  while (used.has(out)) { const e=extName(name), b=baseName(name); out=`${b} (${i++})${e}`; }
+  used.add(out); return out;
+}
+async function output(name, blob){
+  if (dirHandle) {
+    name = uniqueName(name);
+    while (await exists(dirHandle, name)) {
+      const e=extName(name), b=baseName(name);
+      name = uniqueName(`${b} (2)${e}`);
+    }
+    const fh = await dirHandle.getFileHandle(name, {create:true});
+    const w = await fh.createWritable(); await w.write(blob); await w.close();
+    outFiles.push(name);
+  } else {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }
+}
+async function exists(dir, name){ try{ await dir.getFileHandle(name); return true; }catch(e){ return false; } }
+function setStatus(id, text, cls=''){ const el=$(id); el.className='status '+cls; el.textContent=text; }
+function blobFromCanvas(canvas, type, quality){ return new Promise(r=>canvas.toBlob(r,type,quality)); }
+function loadImage(file){ return new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=()=>rej(new Error('无法读取 '+file.name)); img.src=URL.createObjectURL(file); }); }
+
+/* ---------- 图片处理 ---------- */
+$('#imgRun').onclick = async () => {
+  const files=[...$('#imgFiles').files]; if(!files.length) return setStatus('#imgStatus','请选择图片');
+  const max=Math.max(64,+$('#imgMax').value||1600), type=$('#imgFormat').value, q=Math.max(1,Math.min(100,+$('#imgQuality').value||88))/100;
+  let done=0, fail=0;
+  for(const file of files){
+    try{
+      const img=await loadImage(file); const scale=Math.min(1,max/Math.max(img.width,img.height));
+      const w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
+      const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d');
+      if(type==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);} ctx.drawImage(img,0,0,w,h);
+      const blob=await blobFromCanvas(c,type,q); const ext=type==='image/png'?'png':type==='image/webp'?'webp':'jpg';
+      await output(`${baseName(file.name)}_web.${ext}`,blob); done++;
+    }catch(e){fail++;}
+  }
+  setStatus('#imgStatus',`完成 ${done} 张${fail?`，失败 ${fail} 张`:''}${dirHandle?'':'（已下载）'}`, fail?'warn':'ok');
+};
+
+/* ---------- 拼接 ---------- */
+$('#stitchRun').onclick = async () => {
+  const files=[...$('#stitchFiles').files]; if(files.length<2) return setStatus('#stitchStatus','至少选择两张图片');
+  const dir=$('#stitchDir').value, gap=Math.max(0,+$('#stitchGap').value||0), max=Math.max(64,+$('#stitchMax').value||1600), bg=$('#stitchBg').value;
+  try{
+    const imgs=[]; for(const f of files) imgs.push(await loadImage(f));
+    const dims=imgs.map(img=>{
+      if(dir==='v'){const s=Math.min(1,max/img.width);return [Math.round(img.width*s),Math.round(img.height*s)];}
+      const s=Math.min(1,max/img.height);return [Math.round(img.width*s),Math.round(img.height*s)];
+    });
+    const w=dir==='v'?Math.max(...dims.map(d=>d[0])):dims.reduce((a,d)=>a+d[0],0)+gap*(imgs.length-1);
+    const h=dir==='v'?dims.reduce((a,d)=>a+d[1],0)+gap*(imgs.length-1):Math.max(...dims.map(d=>d[1]));
+    if(w>16000||h>16000) throw new Error('拼接结果超过 16000 像素，请降低最大尺寸');
+    const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+    let x=0,y=0;
+    imgs.forEach((img,i)=>{const [dw,dh]=dims[i]; const dx=dir==='v'?(w-dw)/2:x, dy=dir==='v'?y:(h-dh)/2; ctx.drawImage(img,dx,dy,dw,dh); if(dir==='v')y+=dh+gap;else x+=dw+gap;});
+    const blob=await blobFromCanvas(c,'image/png'); await output('拼接长图.png',blob);
+    setStatus('#stitchStatus',`已生成 ${w}×${h} 长图${dirHandle?'到本地文件夹':'并下载'}`,'ok');
+  }catch(e){setStatus('#stitchStatus',e.message,'bad');}
+};
+
+/* ---------- 元数据 ---------- */
+$('#metaRun').onclick = async () => {
+  const files=[...$('#metaFiles').files]; if(!files.length) return setStatus('#metaStatus','请选择图片');
+  let done=0;
+  for(const file of files){
+    try{
+      const img=await loadImage(file); const c=document.createElement('canvas'); c.width=img.width;c.height=img.height;
+      const ctx=c.getContext('2d'); ctx.drawImage(img,0,0);
+      const type=file.type==='image/png'?'image/png':file.type==='image/webp'?'image/webp':'image/jpeg';
+      const blob=await blobFromCanvas(c,type,.92); const ext=type.split('/')[1].replace('jpeg','jpg');
+      await output(`${baseName(file.name)}_无元数据.${ext}`,blob); done++;
+    }catch(e){}
+  }
+  setStatus('#metaStatus',`已生成 ${done} 个无元数据副本`,'ok');
+};
+
+/* ---------- 相似照片 ---------- */
+function dhash(img){
+  const c=document.createElement('canvas'); c.width=9;c.height=8; const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(img,0,0,9,8); const d=ctx.getImageData(0,0,9,8).data; const g=[];
+  for(let i=0;i<d.length;i+=4) g.push((d[i]*299+d[i+1]*587+d[i+2]*114)/1000);
+  let h=0n; for(let y=0;y<8;y++)for(let x=0;x<8;x++){const bit=g[y*9+x]>g[y*9+x+1]?1n:0n;h=(h<<1n)|bit;} return h;
+}
+const hamming=(a,b)=>{let v=a^b,n=0;while(v){n+=Number(v&1n);v>>=1n;}return n;};
+$('#photoRun').onclick = async () => {
+  const files=[...$('#photoFiles').files]; if(files.length<2) return setStatus('#photoStatus','至少选择两张图片');
+  const th=Math.max(70,Math.min(100,+$('#photoThreshold').value||92)), maxDist=Math.round((100-th)/100*64);
+  const entries=[]; for(const f of files){try{const img=await loadImage(f);entries.push({name:f.name,hash:dhash(img),size:f.size});}catch(e){}}
+  const groups=[];
+  for(const e of entries){const g=groups.find(x=>hamming(x.keeper.hash,e.hash)<=maxDist); if(g)g.items.push(e); else groups.push({keeper:e,items:[e]});}
+  const sim=groups.filter(g=>g.items.length>1);
+  $('#photoResult').innerHTML=sim.length?sim.map((g,i)=>`<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><b>组 ${i+1}</b>：${g.items.map(x=>x.name).join(' · ')}</div>`).join(''):'<div class="hint">没有找到相似组</div>';
+  setStatus('#photoStatus',`扫描 ${entries.length} 张，找到 ${sim.length} 组`,'ok');
+};
+
+/* ---------- 拆分/合并 ---------- */
+$('#splitRun').onclick = async () => {
+  const f=$('#splitFile').files[0]; if(!f) return setStatus('#splitStatus','请选择文件');
+  const size=Math.max(.1,+$('#splitSize').value||5)*1024*1024; const count=Math.ceil(f.size/size);
+  if(count>9999) return setStatus('#splitStatus','分片太多，请增大每片大小','bad');
+  for(let i=0;i<count;i++){const blob=f.slice(i*size,Math.min(f.size,(i+1)*size)); await output(`${f.name}.part${String(i+1).padStart(3,'0')}`,blob);}
+  setStatus('#splitStatus',`已生成 ${count} 个分片${dirHandle?'到本地文件夹':'并下载'}`,'ok');
+};
+$('#mergeRun').onclick = async () => {
+  const files=[...$('#mergeFiles').files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+  if(!files.length) return setStatus('#splitStatus','请选择分片');
+  const first=files[0].name, idx=first.lastIndexOf('.part'); const name=idx>0?first.slice(0,idx):'merged.bin';
+  const blob=new Blob(files); await output(name,blob); setStatus('#splitStatus',`已合并 ${files.length} 个分片 → ${name}`,'ok');
+};
+
+/* ---------- 校验/清单 ---------- */
+let hashRows=[];
+$('#hashRun').onclick = async () => {
+  const files=[...$('#hashFiles').files,...$('#hashDir').files]; if(!files.length) return setStatus('#hashStatus','请选择文件或文件夹');
+  hashRows=[]; let done=0;
+  for(const f of files){const buf=await f.arrayBuffer(); const h=new Uint8Array(await crypto.subtle.digest('SHA-256',buf));
+    hashRows.push({path:f.webkitRelativePath||f.name,size:f.size,hash:[...h].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase()}); if(++done%20===0)setStatus('#hashStatus',`计算中 ${done}/${files.length}`);}
+  $('#hashResult').innerHTML='<table><thead><tr><th>相对路径</th><th>大小</th><th>SHA-256</th></tr></thead><tbody>'+hashRows.map(r=>`<tr><td>${esc(r.path)}</td><td>${fmt(r.size)}</td><td class=mono>${r.hash}</td></tr>`).join('')+'</tbody></table>';
+  setStatus('#hashStatus',`已计算 ${hashRows.length} 个文件`,'ok');
+};
+$('#hashCsv').onclick = async () => {
+  if(!hashRows.length) return setStatus('#hashStatus','请先计算');
+  const csv='相对路径,字节,SHA-256\n'+hashRows.map(r=>`"${r.path.replace(/"/g,'""')}",${r.size},${r.hash}`).join('\n');
+  await output('Locifab-清单.csv',new Blob(['\ufeff'+csv],{type:'text/csv'})); setStatus('#hashStatus','CSV 已生成','ok');
+};
+$('#hashManifest').onclick = async () => {
+  if(!hashRows.length) return setStatus('#hashStatus','请先计算 SHA-256');
+  const text=hashRows.map(r=>`${r.hash} *${r.path.replace(/\\/g,'/')}`).join('\n')+'\n';
+  await output('Locifab-SHA256.sha256',new Blob([text],{type:'text/plain'})); setStatus('#hashStatus','SHA-256 清单已生成','ok');
+};
+$('#hashVerify').onclick = async () => {
+  if(!hashRows.length) return setStatus('#hashStatus','请先选择文件并计算 SHA-256');
+  const mf=$('#manifestFile').files[0]; if(!mf) return setStatus('#hashStatus','请选择 .sha256 清单');
+  const text=readText(await mf.arrayBuffer()); const expected=new Map();
+  for(const line of text.replace(/\r/g,'').split('\n')){const m=line.trim().match(/^([A-Fa-f0-9]{64})\s+\*?(.+)$/); if(m)expected.set(m[2].replace(/\\/g,'/'),m[1].toUpperCase());}
+  const actual=new Map(hashRows.map(r=>[r.path.replace(/\\/g,'/'),r.hash]));
+  const rows=[]; for(const [p,h] of expected){if(!actual.has(p))rows.push(['缺失',p,'']); else if(actual.get(p)!==h)rows.push(['变化',p,actual.get(p)]); else rows.push(['一致',p,'']);}
+  for(const [p] of actual) if(!expected.has(p)) rows.push(['新增',p,'']);
+  $('#hashResult').innerHTML='<table><thead><tr><th>状态</th><th>相对路径</th><th>实际 SHA-256</th></tr></thead><tbody>'+rows.map(r=>`<tr><td class="${r[0]==='一致'?'ok':'bad'}">${r[0]}</td><td>${esc(r[1])}</td><td class=mono>${r[2]}</td></tr>`).join('')+'</tbody></table>';
+  setStatus('#hashStatus',`一致 ${rows.filter(r=>r[0]==='一致').length}，变化/新增/缺失 ${rows.filter(r=>r[0]!=='一致').length}`,'ok');
+};
+$('#hashHtml').onclick = async () => {
+  if(!hashRows.length) return setStatus('#hashStatus','请先计算 SHA-256');
+  const now=new Date().toLocaleString(); const rows=hashRows.map(r=>`<tr><td>${esc(r.path)}</td><td>${fmt(r.size)}</td><td class="mono">${r.hash}</td></tr>`).join('');
+  const html=`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>Locifab 审计报告</title><style>body{font-family:"Microsoft YaHei UI",sans-serif;padding:28px;background:#f5f5f5;color:#222}h1{font-size:22px}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:7px;border-bottom:1px solid #ddd;text-align:left;font-size:12px}.mono{font-family:Consolas,monospace;font-size:10px}</style><h1>Locifab 文件审计报告</h1><p>生成时间：${now} · 文件数：${hashRows.length}</p><table><thead><tr><th>相对路径</th><th>大小</th><th>SHA-256</th></tr></thead><tbody>${rows}</tbody></table></html>`;
+  await output('Locifab-审计报告.html',new Blob([html],{type:'text/html'})); setStatus('#hashStatus','HTML 审计报告已生成','ok');
+};
+function fmt(n){const u=['B','KB','MB','GB'];let v=n,i=0;while(v>=1024&&i<3){v/=1024;i++;}return v.toFixed(1)+' '+u[i];}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- 编码 ---------- */
+function readText(buf){
+  let b=new Uint8Array(buf);
+  if(b.length>=3&&b[0]===0xEF&&b[1]===0xBB&&b[2]===0xBF) b=b.slice(3);
+  try{return new TextDecoder('utf-8',{fatal:true}).decode(b);}catch(e){return new TextDecoder('gbk').decode(b);}
+}
+$('#encRun').onclick = async () => {
+  const files=[...$('#encFiles').files]; if(!files.length) return setStatus('#encStatus','请选择文本文件');
+  const target=$('#encTarget').value, nl=$('#encNewline').value; let done=0;
+  for(const f of files){
+    let text=readText(await f.arrayBuffer());
+    if(nl!=='keep'){text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n'); if(nl==='crlf')text=text.replace(/\n/g,'\r\n');}
+    const body=target==='utf8bom'?new Blob(['\ufeff',text],{type:'text/plain;charset=utf-8'}):new Blob([text],{type:'text/plain;charset=utf-8'});
+    await output(`${baseName(f.name)}_编码${extName(f.name)}`,body); done++;
+  }
+  setStatus('#encStatus',`已转换 ${done} 个文件`,'ok');
+};
+
+/* ---------- 差异 ---------- */
+$('#diffRun').onclick = async () => {
+  const a=$('#diffA').files[0], b=$('#diffB').files[0]; if(!a||!b) return setStatus('#diffStatus','请选择两个文件');
+  const A=readText(await a.arrayBuffer()).replace(/\r\n/g,'\n').split('\n'), B=readText(await b.arrayBuffer()).replace(/\r\n/g,'\n').split('\n');
+  if(A.length>3000||B.length>3000) return setStatus('#diffStatus','超过 3000 行，暂不对比','bad');
+  const dp=Array.from({length:A.length+1},()=>new Array(B.length+1).fill(0));
+  for(let i=A.length-1;i>=0;i--)for(let j=B.length-1;j>=0;j--)dp[i][j]=A[i]===B[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  const rows=[];let i=0,j=0;
+  while(i<A.length&&j<B.length){if(A[i]===B[j]){rows.push(['same',i+1,j+1,A[i]]);i++;j++;}else if(dp[i+1][j]>=dp[i][j+1]){rows.push(['del',i+1,'',A[i]]);i++;}else{rows.push(['add','',j+1,B[j]]);j++;}}
+  while(i<A.length)rows.push(['del',i+1,'',A[i++]]); while(j<B.length)rows.push(['add','',j+1,B[j++]]);
+  $('#diffResult').innerHTML='<table><thead><tr><th></th><th>A</th><th>B</th><th>内容</th></tr></thead><tbody>'+rows.map(r=>`<tr class="${r[0]==='add'?'diff-add':r[0]==='del'?'diff-del':''}"><td>${r[0]==='add'?'+':r[0]==='del'?'−':''}</td><td>${r[1]}</td><td>${r[2]}</td><td class=mono>${esc(r[3])}</td></tr>`).join('')+'</tbody></table>';
+  setStatus('#diffStatus',`新增 ${rows.filter(r=>r[0]==='add').length} 行，删除 ${rows.filter(r=>r[0]==='del').length} 行`,'ok');
+};
+
+/* ---------- ZIP ---------- */
+const CRC_TABLE=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function dosTime(d){return ((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()/2))&0xFFFF;}
+function dosDate(d){return (((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;}
+async function deflateRaw(u8){
+  if(!window.CompressionStream) return {method:0,data:u8};
+  try{const cs=new CompressionStream('deflate-raw');const stream=new Blob([u8]).stream().pipeThrough(cs);return {method:8,data:new Uint8Array(await new Response(stream).arrayBuffer())};}
+  catch(e){return {method:0,data:u8};}
+}
+async function inflateRaw(u8){
+  const ds=new DecompressionStream('deflate-raw');const stream=new Blob([u8]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+function u16(v){return new Uint8Array([v&255,(v>>>8)&255]);}
+function u32(v){return new Uint8Array([v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255]);}
+function concat(parts){const len=parts.reduce((a,b)=>a+b.length,0);const out=new Uint8Array(len);let o=0;for(const p of parts){out.set(p,o);o+=p.length;}return out;}
+async function makeZip(files){
+  const locals=[],centrals=[];let offset=0;const now=new Date();
+  for(const file of files){
+    const name=(file.webkitRelativePath||file.name).replace(/\\/g,'/');
+    if(!name||name.startsWith('/')||name.includes('..')) throw new Error('非法路径：'+name);
+    const raw=new Uint8Array(await file.arrayBuffer());const z=await deflateRaw(raw);const crc=crc32(raw);
+    const n=new TextEncoder().encode(name);
+    const lh=concat([u32(0x04034b50),u16(20),u16(0x0800),u16(z.method),u16(dosTime(now)),u16(dosDate(now)),u32(crc),u32(z.data.length),u32(raw.length),u16(n.length),u16(0),n,z.data]);
+    const ch=concat([u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(z.method),u16(dosTime(now)),u16(dosDate(now)),u32(crc),u32(z.data.length),u32(raw.length),u16(n.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),n]);
+    locals.push(lh);centrals.push(ch);offset+=lh.length;
+  }
+  const cd=concat(centrals);const eocd=concat([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cd.length),u32(offset),u16(0)]);
+  return new Blob([...locals,cd,eocd],{type:'application/zip'});
+}
+async function readZip(file){
+  const buf=new Uint8Array(await file.arrayBuffer());const dv=new DataView(buf.buffer);let e=-1;
+  for(let i=buf.length-22;i>=Math.max(0,buf.length-65557);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break;}}
+  if(e<0) throw new Error('不是有效的 ZIP 文件');
+  const count=dv.getUint16(e+10,true),cdOff=dv.getUint32(e+16,true);let p=cdOff;
+  const entries=[];
+  for(let i=0;i<count;i++){
+    if(dv.getUint32(p,true)!==0x02014b50) throw new Error('ZIP 中央目录损坏');
+    const method=dv.getUint16(p+10,true),crc=dv.getUint32(p+16,true),cs=dv.getUint32(p+20,true),us=dv.getUint32(p+24,true);
+    const nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+    const name=new TextDecoder('utf-8').decode(buf.slice(p+46,p+46+nl)).replace(/\\/g,'/');
+    p+=46+nl+el+cl;
+    if(name.endsWith('/')) { entries.push({name,isDir:true,size:0}); continue; }
+    if(name.startsWith('/')||name.split('/').includes('..')) throw new Error('ZIP 包含不安全路径：'+name);
+    const lnl=dv.getUint16(lo+26,true),lel=dv.getUint16(lo+28,true),dataOff=lo+30+lnl+lel;
+    const comp=buf.slice(dataOff,dataOff+cs);
+    const raw=method===0?comp:await inflateRaw(comp);
+    entries.push({name,isDir:false,size:us,data:raw});
+  }
+  return entries;
+}
+async function ensureDir(root,name){
+  let cur=root; for(const p of name.split('/').filter(Boolean)) cur=await cur.getDirectoryHandle(p,{create:true}); return cur;
+}
+async function writePath(root,name,data){
+  const parts=name.split('/').filter(Boolean); if(!parts.length)return;
+  const fileName=parts.pop();let cur=root;
+  for(const p of parts) cur=await cur.getDirectoryHandle(p,{create:true});
+  const fh=await cur.getFileHandle(fileName,{create:true});const w=await fh.createWritable();await w.write(data);await w.close();
+}
+$('#zipRun').onclick=async()=>{
+  const files=[...$('#zipFiles').files,...$('#zipDir').files];if(!files.length)return setStatus('#zipStatus','请选择文件');
+  try{setStatus('#zipStatus','正在压缩…');const blob=await makeZip(files);await output('Locifab-压缩包.zip',blob);setStatus('#zipStatus',`已压缩 ${files.length} 个文件`,'ok');}
+  catch(e){setStatus('#zipStatus',e.message,'bad');}
+};
+let zipEntries=[];
+$('#zipPreview').onclick=async()=>{
+  const f=$('#zipInput').files[0];if(!f)return setStatus('#zipStatus','请选择 ZIP');
+  try{zipEntries=await readZip(f);$('#zipList').innerHTML='<table><thead><tr><th>文件</th><th>大小</th></tr></thead><tbody>'+zipEntries.map(e=>`<tr><td>${esc(e.name)}</td><td>${e.isDir?'目录':fmt(e.size)}</td></tr>`).join('')+'</tbody></table>';setStatus('#zipStatus',`共 ${zipEntries.length} 项`,'ok');}
+  catch(e){zipEntries=[];setStatus('#zipStatus',e.message,'bad');}
+};
+$('#zipExtract').onclick=async()=>{
+  if(!dirHandle)return setStatus('#zipStatus','请先在右上角选择输出文件夹','bad');
+  if(!zipEntries.length)return setStatus('#zipStatus','请先预览 ZIP','bad');
+  try{for(const e of zipEntries){if(e.isDir) await ensureDir(dirHandle,e.name); else await writePath(dirHandle,e.name,e.data);}setStatus('#zipStatus',`已解压 ${zipEntries.length} 项`,'ok');}
+  catch(e){setStatus('#zipStatus','解压失败：'+e.message,'bad');}
+};
+
+/* ---------- 清理 ---------- */
+let cleanHandle=null,cleanItems=[];
+$('#cleanPick').onclick=async()=>{
+  try{if(!window.showDirectoryPicker)throw new Error('当前浏览器不支持目录扫描');cleanHandle=await window.showDirectoryPicker({mode:'readwrite'});setStatus('#cleanStatus','已选择：'+cleanHandle.name+'，请点扫描');}
+  catch(e){setStatus('#cleanStatus',e.message,'bad');}
+};
+async function scanClean(dir,rel=''){
+  const items=[];
+  for await(const [name,h] of dir.entries()){
+    const path=rel?rel+'/'+name:name;
+    if(h.kind==='directory'){
+      const sub=await scanClean(h,path);
+      items.push(...sub);
+      let empty=true;for await(const _ of h.entries()){empty=false;break;}
+      if(empty)items.push({path,name,parent:dir,kind:'dir',size:0});
+    }else{
+      const f=await h.getFile();
+      if(f.size===0)items.push({path,name,parent:dir,kind:'file',size:0});
+    }
+  }
+  return items;
+}
+$('#cleanScan').onclick=async()=>{
+  if(!cleanHandle)return setStatus('#cleanStatus','请先选择扫描文件夹','bad');
+  try{cleanItems=await scanClean(cleanHandle);$('#cleanResult').innerHTML='<table><thead><tr><th>类型</th><th>路径</th></tr></thead><tbody>'+cleanItems.map(x=>`<tr><td>${x.kind==='dir'?'空目录':'0 字节文件'}</td><td>${esc(x.path)}</td></tr>`).join('')+'</tbody></table>';setStatus('#cleanStatus',`找到 ${cleanItems.length} 项；清理前请确认`,'warn');}
+  catch(e){setStatus('#cleanStatus',e.message,'bad');}
+};
+$('#cleanDelete').onclick=async()=>{
+  if(!cleanItems.length)return setStatus('#cleanStatus','没有可清理项','warn');
+  if(!confirm(`将删除 ${cleanItems.length} 个空目录/0 字节文件，且不可恢复。继续？`))return;
+  let done=0;
+  for(const x of cleanItems){try{await x.parent.removeEntry(x.name,{recursive:false});done++;}catch(e){}}
+  setStatus('#cleanStatus',`已删除 ${done} 项${done<cleanItems.length?'，部分项目因非空/权限失败':''}`,'ok');cleanItems=[];
+};
+
+/* ---------- 时间与属性桥接 ---------- */
+const BRIDGE = 'http://127.0.0.1:9501/api/file-state';
+let stateRows = [], lastStateId = '';
+$('#stateFixedTime').value = new Date().toISOString().slice(0,16);
+$('#stateMode').onchange = () => {
+  const isTime=$('#stateMode').value==='timestamps';
+  $('#stateTimeFields').hidden=!isTime; $('#stateAttrFields').hidden=isTime;
+};
+async function bridgeCall(action, body){
+  let r; try { r=await fetch(`${BRIDGE}/${action}?token=LOCIFAB`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); }
+  catch(e){ throw new Error('无法连接本地桥接，请重新运行启动网页版.cmd'); }
+  const data=await r.json(); if(!data.ok) throw new Error(data.error||'桥接返回错误'); return data.result;
+}
+function stateBody(){
+  const folder=$('#stateFolder').value.trim(); if(!folder) throw new Error('请填写文件夹路径');
+  return {folder,recursive:$('#stateRecursive').checked,extensions:'',mode:$('#stateMode').value,
+    offsetMode:$('#stateTimeMode').value==='offset',fixedTime:$('#stateFixedTime').value?new Date($('#stateFixedTime').value).toISOString():'',
+    offsetDays:+$('#stateOffset').value||0,applyCreated:$('#stateCreated').checked,applyModified:$('#stateModified').checked,applyAccessed:$('#stateAccessed').checked,
+    setReadOnly:$('#stateReadOnly').checked,setHidden:$('#stateHidden').checked,setArchive:$('#stateArchive').checked,remove:$('#stateRemove').checked};
+}
+$('#statePreview').onclick = async () => {
+  try{setStatus('#stateStatus','正在预览…');const r=await bridgeCall('preview',stateBody());stateRows=r.rows||[];
+    $('#stateResult').innerHTML='<table><thead><tr><th>文件</th><th>原值</th><th>新值</th></tr></thead><tbody>'+stateRows.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.oldText)}</td><td>${esc(x.newText)}</td></tr>`).join('')+'</tbody></table>';
+    setStatus('#stateStatus',`共 ${stateRows.length} 个文件`,'ok');}
+  catch(e){setStatus('#stateStatus',e.message,'bad');}
+};
+$('#stateApply').onclick = async () => {
+  if(!stateRows.length) return setStatus('#stateStatus','请先预览');
+  if(!confirm(`将修改 ${stateRows.length} 个文件的时间/属性，继续？`)) return;
+  try{const r=await bridgeCall('apply',stateBody());lastStateId=r.id;setStatus('#stateStatus',`已修改 ${r.count}/${r.total} 个文件；可回退`,'ok');}
+  catch(e){setStatus('#stateStatus',e.message,'bad');}
+};
+$('#stateUndo').onclick = async () => {
+  if(!lastStateId) return setStatus('#stateStatus','没有可回退的批次','warn');
+  try{const r=await bridgeCall('undo',{id:lastStateId});setStatus('#stateStatus',`已恢复 ${r.count} 个文件`,'ok');lastStateId='';stateRows=[];}
+  catch(e){setStatus('#stateStatus',e.message,'bad');}
+};
+
+/* ---------- 流水线 ---------- */
+$('#pipeRun').onclick = async () => {
+  const files=[...$('#pipeFiles').files]; if(!files.length) return setStatus('#pipeStatus','请选择文件');
+  const doZip=$('#pipeZip').checked, doHash=$('#pipeHash').checked;
+  if(!doZip&&!doHash) return setStatus('#pipeStatus','至少勾选一个步骤');
+  try{
+    setStatus('#pipeStatus','正在执行…');
+    if(doZip){await output('Locifab-流水线.zip',await makeZip(files));}
+    if(doHash){
+      const rows=[];
+      for(const f of files){const h=new Uint8Array(await crypto.subtle.digest('SHA-256',await f.arrayBuffer()));
+        rows.push({path:f.webkitRelativePath||f.name,size:f.size,hash:[...h].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase()});}
+      await output('Locifab-流水线清单.sha256',new Blob([rows.map(r=>`${r.hash} *${r.path.replace(/\\/g,'/')}`).join('\n')+'\n'],{type:'text/plain'}));
+      const html=`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>流水线审计</title><style>body{font-family:"Microsoft YaHei UI",sans-serif;padding:24px}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #ddd;padding:6px;text-align:left;font-size:12px}.mono{font-family:Consolas,monospace;font-size:10px}</style><h1>Locifab 流水线审计</h1><p>文件数：${rows.length}</p><table><thead><tr><th>路径</th><th>大小</th><th>SHA-256</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.path)}</td><td>${fmt(r.size)}</td><td class=mono>${r.hash}</td></tr>`).join('')}</tbody></table></html>`;
+      await output('Locifab-流水线报告.html',new Blob([html],{type:'text/html'}));
+    }
+    setStatus('#pipeStatus','流水线完成'+(dirHandle?'，已写入本地文件夹':'，已下载'),'ok');
+  }catch(e){setStatus('#pipeStatus',e.message,'bad');}
+};
+
+/* ---------- 导出 ---------- */
+function escHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+$('#exportRun').onclick = async () => {
+  const text=$('#exportText').value, fmt=$('#exportFormat').value;
+  if(!text.trim()) return setStatus('#exportStatus','内容为空');
+  if(fmt==='pdf'){
+    const w=window.open('','_blank'); if(!w) return setStatus('#exportStatus','浏览器拦截了打印窗口','bad');
+    w.document.write(`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>Locifab 导出</title><style>body{font-family:"Microsoft YaHei UI",sans-serif;line-height:1.8;padding:40px;white-space:pre-wrap}</style><body>${escHtml(text)}</body></html>`);
+    w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
+    setStatus('#exportStatus','已打开打印窗口，选择“另存为 PDF”','ok'); return;
+  }
+  let body, name;
+  if(fmt==='md'){body=text;name='Locifab-导出.md';}
+  else {
+    const html=`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>Locifab 导出</title><style>body{font-family:"Microsoft YaHei UI",sans-serif;line-height:1.8;padding:40px;max-width:900px;margin:auto}h1{font-size:22px}</style><body>${escHtml(text)}</body></html>`;
+    body=html;name=fmt==='doc'?'Locifab-导出.doc':'Locifab-导出.html';
+  }
+  await output(name,new Blob([body],{type:fmt==='doc'?'application/msword':'text/plain;charset=utf-8'}));
+  setStatus('#exportStatus','已导出 '+name,'ok');
+};
+
+/* ---------- 搜索 ---------- */
+$('#searchRun').onclick = () => {
+  const files=[...$('#searchDir').files]; if(!files.length) return setStatus('#searchStatus','请选择一个文件夹');
+  const raw=($('#searchPattern').value||'').trim();
+  const re=raw?(raw.includes('*')||raw.includes('?')?new RegExp('^'+raw.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$','i'):null):null;
+  const rows=files.filter(f=>{const p=f.webkitRelativePath||f.name; if(!raw)return true; if(re)return re.test(f.name)||re.test(p); return p.toLowerCase().includes(raw.toLowerCase());});
+  $('#searchResult').innerHTML='<table><thead><tr><th>文件</th><th>相对路径</th><th>大小</th></tr></thead><tbody>'+rows.map(f=>`<tr><td>${esc(f.name)}</td><td>${esc(f.webkitRelativePath||f.name)}</td><td>${fmt(f.size)}</td></tr>`).join('')+'</tbody></table>';
+  setStatus('#searchStatus',`找到 ${rows.length} 个文件`,'ok');
+};
+
+/* ---------- 模板 ---------- */
+$('#tplRun').onclick = async () => {
+  if(!dirHandle) return setStatus('#tplStatus','请先在右上角选择输出文件夹','bad');
+  const lines=$('#tplText').value.replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(x=>x&&!x.startsWith('#'));
+  let made=0;
+  for(const line of lines){
+    const isDir=line.endsWith('/')||line.endsWith('\\'); const rel=line.replace(/[\\/]+$/,'').replace(/\\/g,'/');
+    if(!rel||rel.startsWith('/')||rel.includes('..')) return setStatus('#tplStatus','非法路径：'+line,'bad');
+    const parts=rel.split('/');
+    if(isDir){
+      let cur=dirHandle;
+      for(const p of parts) cur=await cur.getDirectoryHandle(p,{create:true});
+    } else {
+      const name=parts.pop();
+      let cur=dirHandle;
+      for(const p of parts) cur=await cur.getDirectoryHandle(p,{create:true});
+      const fh=await cur.getFileHandle(name,{create:true});
+      const w=await fh.createWritable(); await w.close();
+    }
+    made++;
+  }
+  setStatus('#tplStatus',`已创建/确认 ${made} 项`,'ok');
+};
+
+/* 兼容性提示 */
+if(!window.showDirectoryPicker){ $('#dirLabel').textContent='输出：浏览器不支持直接写文件夹（将下载）'; }
+</script>
+</body>
+</html>

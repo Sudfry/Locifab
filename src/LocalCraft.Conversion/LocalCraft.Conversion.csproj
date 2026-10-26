@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>LocalCraft.Conversion</RootNamespace>
+    <AssemblyName>LocalCraft.Conversion</AssemblyName>
+    <Description>LocalCraft 离线格式转换内核：图像 WIC 编解码、文档文本转换与外部引擎适配。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LocalCraft.Core\LocalCraft.Core.csproj" />
+  </ItemGroup>
+
+</Project>

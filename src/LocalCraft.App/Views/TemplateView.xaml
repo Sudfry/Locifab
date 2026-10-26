@@ -1,0 +1,75 @@
+<UserControl x:Class="LocalCraft.App.Views.TemplateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             xmlns:services="clr-namespace:LocalCraft.App.Services"
+             xmlns:controls="clr-namespace:LocalCraft.App.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:TemplateViewModel}">
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <Grid Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="目录模板" Style="{StaticResource PageTitle}" />
+                <TextBlock Text="用模板批量创建项目、客户或日期目录；只创建不存在的项，不覆盖已有文件。" Style="{StaticResource PageSubtitle}" />
+            </StackPanel>
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource SecondaryButton}"
+                    Command="{Binding OpenUndoCenterCommand}" Content="↩  回退中心" />
+        </Grid>
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+            <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="10" /><ColumnDefinition Width="1.4*" /></Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="目标文件夹" Style="{StaticResource FieldLabel}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <controls:PathTextBox Text="{Binding Root, Mode=TwoWay}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseCommand}" Content="选择" Margin="7,0,0,0" />
+                    </Grid>
+
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="选择模板（可再编辑）" Style="{StaticResource FieldLabel}" />
+                    <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding Presets}"
+                              SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                              Margin="0,0,0,6" ToolTip="选择常用模板，然后可在下方自由修改">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="模板内容（每行一个路径）" Style="{StaticResource FieldLabel}" Margin="0,8,0,6" />
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding Template, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True" TextWrapping="NoWrap" Height="140" VerticalScrollBarVisibility="Auto"
+                             FontFamily="Consolas, Microsoft YaHei UI" />
+                </StackPanel>
+            </Grid>
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <TextBlock Text="{Binding Summary}" Margin="16,12,16,8" FontSize="9.5" Foreground="{DynamicResource MutedBrush}" />
+                <DataGrid Grid.Row="1" Style="{StaticResource PreviewDataGrid}" ItemsSource="{Binding Rows}" Margin="8,0,8,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="相对路径" Binding="{Binding RelativePath}" Width="*" />
+                        <DataGridTextColumn Header="类型" Binding="{Binding KindText}" Width="90" />
+                        <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="90" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="16,10,0,12">
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding PreviewCommand}" Content="① 预览结构" Margin="0,0,7,0" />
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding ExecuteCommand}" Content="② 创建目录结构" />
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="0,10,0,0"
+                Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="{Binding ResultTitle}" FontWeight="SemiBold" FontSize="11" />
+                <TextBlock Text="{Binding ResultMessage}" FontSize="10" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

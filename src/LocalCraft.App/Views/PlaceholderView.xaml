@@ -1,0 +1,184 @@
+<UserControl x:Class="LocalCraft.App.Views.PlaceholderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:PlaceholderViewModel}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,6,0">
+            <!-- Header -->
+            <Grid Margin="0,0,0,14">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource PageTitle}" />
+                        <Border Background="{DynamicResource WarmSoftBrush}"
+                                CornerRadius="6"
+                                Padding="8,3"
+                                Margin="12,2,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ModuleNumber}"
+                                       FontSize="9"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource WarmBrush}" />
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceMutedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8,3"
+                                Margin="7,2,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="规划中"
+                                       FontSize="9"
+                                       Foreground="{DynamicResource MutedBrush}" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Description}"
+                               Style="{StaticResource PageSubtitle}"
+                               MaxWidth="900"
+                               HorizontalAlignment="Left" />
+                </StackPanel>
+            </Grid>
+
+            <Border Background="{DynamicResource AccentSoftBrush}"
+                    BorderBrush="#C9E0D9"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="12,9"
+                    Margin="0,0,0,14">
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="20" Height="20" CornerRadius="6" Background="{DynamicResource AccentBrush}">
+                        <TextBlock Text="i" Foreground="White" FontSize="10" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="该模块尚未接入界面。当前版本已完整交付模块 1：只读预览、冲突检测、执行日志与一键回退。"
+                               FontSize="10.5"
+                               Foreground="{DynamicResource AccentBrush}"
+                               VerticalAlignment="Center"
+                               Margin="9,0,0,0" />
+                </StackPanel>
+            </Border>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.7*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Planned feature cards -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="规划能力" FontSize="12.5" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding PreviewLabel}"
+                                           FontSize="10"
+                                           Foreground="{DynamicResource MutedBrush}"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                            <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Background="{DynamicResource SurfaceMutedBrush}"
+                                    CornerRadius="6" Padding="7,3">
+                                <TextBlock Text="复用模块 1 底座" FontSize="9" Foreground="{DynamicResource MutedBrush}" />
+                            </Border>
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{Binding Features}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SurfaceMutedBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="13,11"
+                                            Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="4" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Background="{DynamicResource WarmBrush}"
+                                                    CornerRadius="2"
+                                                    Width="3"
+                                                    HorizontalAlignment="Left" />
+                                            <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontSize="11.5"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Description}"
+                                                           FontSize="10.5"
+                                                           Foreground="{DynamicResource InkSoftBrush}"
+                                                           TextWrapping="Wrap"
+                                                           Margin="0,4,0,0"
+                                                           LineHeight="17" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Technical route -->
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="技术路径" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Text="离线、轻量、可回退"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource MutedBrush}"
+                                   Margin="0,3,0,14" />
+
+                        <ItemsControl ItemsSource="{Binding TechnicalNotes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Ellipse Width="5" Height="5"
+                                                 Fill="{DynamicResource AccentBrush}"
+                                                 VerticalAlignment="Top"
+                                                 Margin="0,6,8,0" />
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding}"
+                                                   FontSize="10.5"
+                                                   Foreground="{DynamicResource InkSoftBrush}"
+                                                   TextWrapping="Wrap"
+                                                   LineHeight="17" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border Background="{DynamicResource SidebarBrush}"
+                                CornerRadius="10"
+                                Padding="13,12"
+                                Margin="0,4,0,0">
+                            <StackPanel>
+                                <TextBlock Text="交付原则" FontSize="9.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="#8FA9A4" />
+                                <TextBlock Text="先让用户看到结果，再让用户决定执行。"
+                                           FontSize="11"
+                                           Foreground="#EEF5F2"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
+                                <TextBlock Text="所有批量变更都必须有本地日志和逆向路径。"
+                                           FontSize="9.5"
+                                           Foreground="#9CB5B1"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

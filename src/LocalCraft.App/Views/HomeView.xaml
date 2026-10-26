@@ -1,0 +1,118 @@
+<UserControl x:Class="LocalCraft.App.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:HomeViewModel}"
+             AllowDrop="True" DragOver="HomeView_DragOver" Drop="HomeView_Drop"
+             Loaded="HomeView_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <Border x:Name="HeroCard" Background="{DynamicResource AccentSoftBrush}" CornerRadius="16" Padding="22,18"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="开始使用 Locifab" FontSize="25" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentInkBrush}" />
+                        <TextBlock Text="把文件拖进窗口，或从下面选一个常用功能。所有操作都先预览、再执行、可回退。"
+                                   FontSize="11.5" Foreground="{DynamicResource InkSoftBrush}"
+                                   TextWrapping="Wrap" Margin="0,7,0,0" />
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Style="{StaticResource PrimaryButton}" Content="打开功能说明"
+                                    Command="{Binding OpenCommand}" CommandParameter="guide" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border x:Name="WelcomeCard" Style="{StaticResource CardBorder}" Margin="0,0,0,12"
+                    Visibility="{Binding IsWelcomeVisible, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="第一次使用？按这三步就够了" FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="① 拖入文件或文件夹  →  ② 看预览并确认  →  ③ 执行后可在回退中心恢复。"
+                                   FontSize="10.5" Foreground="{DynamicResource MutedBrush}"
+                                   TextWrapping="Wrap" Margin="0,6,0,0" />
+                    </StackPanel>
+                    <Button Style="{StaticResource GhostButton}" Content="✕" ToolTip="不再显示"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Command="{Binding DismissWelcomeCommand}" />
+                </Grid>
+            </Border>
+
+            <TextBlock Text="常用功能" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <ItemsControl x:Name="ActionList" ItemsSource="{Binding Actions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource CardBrush}"
+                                BorderBrush="{Binding CategoryHighlightBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="14,12" Margin="0,0,9,9"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="CardScale" ScaleX="1" ScaleY="1" />
+                            </Border.RenderTransform>
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="CardScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1.015" Duration="0:0:0.12" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1.015" Duration="0:0:0.12" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="CardScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1" Duration="0:0:0.14" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1" Duration="0:0:0.14" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="SemiBold" />
+                                    <Border Background="{Binding CategorySoftBrush}" CornerRadius="5"
+                                            Padding="6,2" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding Badge}" FontSize="8.5"
+                                                   Foreground="{Binding CategoryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <TextBlock Text="{Binding Hint}" FontSize="10" FontWeight="SemiBold"
+                                           Foreground="{Binding CategoryBrush}" Margin="0,6,0,0" />
+                                <TextBlock Text="{Binding Description}" FontSize="9.5"
+                                           Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"
+                                           Margin="0,4,0,9" />
+                                <Button Style="{StaticResource SecondaryButton}" Content="打开"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding Key}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border x:Name="SafetyCard" Style="{StaticResource CardBorder}" Margin="0,3,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="安全设计：" FontSize="10.5" FontWeight="SemiBold"
+                               Foreground="{DynamicResource SuccessBrush}" />
+                    <TextBlock Text="预览前不修改文件；执行前备份或写日志；回退中心可恢复原状。"
+                               FontSize="10.5" Foreground="{DynamicResource MutedBrush}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

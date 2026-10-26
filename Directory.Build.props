@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <Product>LocalCraft</Product>
+    <Company>LocalCraft</Company>
+    <Copyright>Copyright © 2026 LocalCraft</Copyright>
+  </PropertyGroup>
+</Project>

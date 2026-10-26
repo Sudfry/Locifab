@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>LocalCraft.Core</RootNamespace>
+    <AssemblyName>LocalCraft.Core</AssemblyName>
+    <Description>LocalCraft 的离线文件处理内核：规划、预览、执行与可回退日志。</Description>
+  </PropertyGroup>
+
+</Project>

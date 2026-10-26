@@ -1,0 +1,303 @@
+[
+  {
+    "name": "全流程-输入整理交付",
+    "sourceFolder": "",
+    "outputFolder": "",
+    "steps": [
+      {
+        "kind": "Rename",
+        "name": "批量重命名",
+        "enabled": true,
+        "text1": "交付_",
+        "text2": "",
+        "text3": "_",
+        "number1": 1,
+        "number2": 3,
+        "choice": "",
+        "bool1": true,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "ImageCheck",
+        "name": "图片完整性",
+        "enabled": true,
+        "text1": "损坏图片隔离",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "ImageTarget",
+        "name": "图片目标压缩",
+        "enabled": true,
+        "text1": "图片压缩",
+        "text2": "",
+        "text3": "",
+        "number1": 800,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Report",
+        "name": "清单报告",
+        "enabled": true,
+        "text1": "",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "Csv",
+        "bool1": true,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Archive",
+        "name": "ZIP 处理",
+        "enabled": true,
+        "text1": "交付包.zip",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "Compress",
+        "bool1": true,
+        "bool2": false,
+        "templateName": ""
+      }
+    ]
+  },
+  {
+    "name": "素材库清洗",
+    "sourceFolder": "",
+    "outputFolder": "",
+    "steps": [
+      {
+        "kind": "ImageCheck",
+        "name": "图片完整性",
+        "enabled": true,
+        "text1": "损坏图片隔离",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "ImageTarget",
+        "name": "图片目标压缩",
+        "enabled": true,
+        "text1": "图片压缩",
+        "text2": "",
+        "text3": "",
+        "number1": 500,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "PhotoDedup",
+        "name": "相似照片",
+        "enabled": true,
+        "text1": "相似照片隔离",
+        "text2": "",
+        "text3": "",
+        "number1": 92,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Report",
+        "name": "清单报告",
+        "enabled": true,
+        "text1": "",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "Csv",
+        "bool1": true,
+        "bool2": false,
+        "templateName": ""
+      }
+    ]
+  },
+  {
+    "name": "文档交付与隐私",
+    "sourceFolder": "",
+    "outputFolder": "",
+    "steps": [
+      {
+        "kind": "Convert",
+        "name": "格式转换",
+        "enabled": true,
+        "text1": "转换结果",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "pdf",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Metadata",
+        "name": "元数据清理",
+        "enabled": true,
+        "text1": "去元数据",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Checksum",
+        "name": "SHA-256 校验",
+        "enabled": true,
+        "text1": "Locifab-SHA256.txt",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "SHA-256",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Report",
+        "name": "清单报告",
+        "enabled": true,
+        "text1": "",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "Csv",
+        "bool1": true,
+        "bool2": false,
+        "templateName": ""
+      }
+    ]
+  },
+  {
+    "name": "备份前审计",
+    "sourceFolder": "",
+    "outputFolder": "",
+    "steps": [
+      {
+        "kind": "Checksum",
+        "name": "SHA-256 校验",
+        "enabled": true,
+        "text1": "Locifab-SHA256.txt",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "SHA-256",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Backup",
+        "name": "备份副本",
+        "enabled": true,
+        "text1": "备份",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": ""
+      },
+      {
+        "kind": "Report",
+        "name": "清单报告",
+        "enabled": true,
+        "text1": "",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "Csv",
+        "bool1": true,
+        "bool2": false,
+        "templateName": ""
+      }
+    ]
+  },
+  {
+    "name": "导入配置模块组合",
+    "sourceFolder": "",
+    "outputFolder": "",
+    "steps": [
+      {
+        "kind": "Rename",
+        "name": "批量重命名",
+        "enabled": true,
+        "text1": "交付_",
+        "text2": "",
+        "text3": "_",
+        "number1": 1,
+        "number2": 3,
+        "choice": "",
+        "bool1": true,
+        "bool2": false,
+        "templateName": "交付前缀+序号"
+      },
+      {
+        "kind": "ImageTarget",
+        "name": "图片目标压缩",
+        "enabled": true,
+        "text1": "图片压缩",
+        "text2": "",
+        "text3": "",
+        "number1": 500,
+        "number2": 0,
+        "choice": "",
+        "bool1": false,
+        "bool2": false,
+        "templateName": "图片500KB"
+      },
+      {
+        "kind": "Checksum",
+        "name": "SHA-256 校验",
+        "enabled": true,
+        "text1": "Locifab-SHA256.txt",
+        "text2": "",
+        "text3": "",
+        "number1": 0,
+        "number2": 0,
+        "choice": "SHA-256",
+        "bool1": false,
+        "bool2": false,
+        "templateName": "SHA-256清单"
+      }
+    ]
+  }
+]

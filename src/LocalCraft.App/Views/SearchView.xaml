@@ -1,0 +1,154 @@
+<UserControl x:Class="LocalCraft.App.Views.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SearchViewModel}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="全局搜索" Style="{StaticResource PageTitle}" />
+                <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="8,3"
+                        Margin="12,2,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="名称 · 正则 · 大小 · 投递" FontSize="9" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentInkBrush}" />
+                </Border>
+            </StackPanel>
+            <TextBlock Text="按名称、通配符或正则搜索本机文件；结果可直接投递到格式转换。"
+                       Style="{StaticResource PageSubtitle}" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="搜索范围" FontSize="10" Foreground="{DynamicResource MutedBrush}"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox Grid.Column="1" Style="{StaticResource InputTextBox}" IsReadOnly="True"
+                                 Text="{Binding Folder, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding Folder}" />
+                    </Grid>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseCommand}"
+                            Content="选择文件夹" Margin="8,0,0,0" />
+                </Grid>
+                <Grid Margin="0,7,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="名称/通配符/正则；留空匹配全部" />
+                    <CheckBox Grid.Column="2" Content="正则" IsChecked="{Binding UseRegex}" VerticalAlignment="Center" />
+                    <Button Grid.Column="4" Style="{StaticResource PrimaryButton}" Command="{Binding SearchCommand}"
+                            Content="搜索" />
+                </Grid>
+                <Grid Margin="0,7,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Content="包含子文件夹" IsChecked="{Binding IncludeSubfolders}" Margin="0,0,14,0" />
+                    <CheckBox Grid.Column="1" Content="包含隐藏项" IsChecked="{Binding IncludeHidden}" Margin="0,0,18,0" />
+                    <TextBlock Grid.Column="2" Text="扩展名" FontSize="9" Foreground="{DynamicResource MutedBrush}"
+                               VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <TextBox Grid.Column="3" Style="{StaticResource InputTextBox}" Height="30" MinHeight="30"
+                             Text="{Binding Extensions, UpdateSourceTrigger=PropertyChanged}" ToolTip="如 pdf, docx" />
+                    <TextBlock Grid.Column="5" Text="最小 MB" FontSize="9" Foreground="{DynamicResource MutedBrush}"
+                               VerticalAlignment="Center" Margin="0,0,4,0" />
+                    <TextBox Grid.Column="6" Style="{StaticResource InputTextBox}" Height="30" MinHeight="30"
+                             Text="{Binding MinSizeMb, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Grid.Column="8" Text="最大 MB" FontSize="9" Foreground="{DynamicResource MutedBrush}"
+                               VerticalAlignment="Center" Margin="0,0,4,0" />
+                    <TextBox Grid.Column="9" Style="{StaticResource InputTextBox}" Height="30" MinHeight="30"
+                             Text="{Binding MaxSizeMb, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+                <Grid Margin="0,4,0,0">
+                    <TextBlock Text="大小过滤：最小/最大 MB；留空不限制。通配符示例：*.pdf、report?.docx。"
+                               FontSize="8.5" Foreground="{DynamicResource MutedBrush}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Margin="16,12,16,8">
+                    <StackPanel>
+                        <TextBlock Text="搜索结果" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SummaryText}" FontSize="9.5"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding SelectedText}" FontSize="9"
+                               Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Right"
+                               VerticalAlignment="Top" />
+                </Grid>
+                <DataGrid Grid.Row="1" Style="{StaticResource PreviewDataGrid}"
+                          ItemsSource="{Binding Rows}" Margin="8,0,8,0">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="选" Width="44" CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="文件" Binding="{Binding Name}" Width="1.2*" />
+                        <DataGridTextColumn Header="相对路径" Binding="{Binding RelativePath}" Width="1.5*" />
+                        <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="80" />
+                        <DataGridTextColumn Header="修改时间" Binding="{Binding ModifiedText}" Width="120" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Grid Grid.Row="2" Margin="16,10,16,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource GhostButton}" Command="{Binding SelectAllCommand}"
+                                Content="全选" Margin="0,0,6,0" />
+                        <Button Style="{StaticResource GhostButton}" Command="{Binding ClearSelectionCommand}"
+                                Content="清空" Margin="0,0,12,0" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding CopyPathsCommand}"
+                                Content="复制路径" Margin="0,0,6,0" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding RevealCommand}"
+                                Content="打开位置" Margin="0,0,12,0" />
+                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding DeliverCommand}"
+                                Content="投递到格式转换" />
+                    </StackPanel>
+                    <TextBlock Text="投递会切换到格式转换并加入选中文件，不会立即修改文件。"
+                               FontSize="9" Foreground="{DynamicResource MutedBrush}"
+                               HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

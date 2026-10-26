@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>LocalCraft.SelfTest</RootNamespace>
+    <AssemblyName>LocalCraft.SelfTest</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LocalCraft.Core\LocalCraft.Core.csproj" />
+    <ProjectReference Include="..\..\src\LocalCraft.Conversion\LocalCraft.Conversion.csproj" />
+  </ItemGroup>
+
+</Project>

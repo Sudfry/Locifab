@@ -1,0 +1,131 @@
+<UserControl x:Class="LocalCraft.App.Views.LinksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:LinksViewModel}">
+        <StackPanel Margin="0,0,8,0">
+            <StackPanel Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="常用链接" Style="{StaticResource PageTitle}" />
+                    <Border Background="{DynamicResource WarningSoftBrush}" CornerRadius="6" Padding="8,3"
+                            Margin="12,2,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="外部网站 · 系统浏览器打开" FontSize="9" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource WarningBrush}" />
+                    </Border>
+                </StackPanel>
+                <TextBlock Text="程序本身不联网。只有你点击链接时，才会用系统默认浏览器打开对应网站。"
+                           Style="{StaticResource PageSubtitle}" />
+            </StackPanel>
+
+            <Border Background="{DynamicResource AccentSoftBrush}" BorderBrush="{DynamicResource AccentBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="13,10" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="关于这些链接" FontSize="10.5" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentInkBrush}" />
+                    <TextBlock Text="本地引擎已覆盖大多数转换；保版式 Office 转 PDF、扫描件识别等仍可能需要更强的在线服务。这些网站有自己的隐私政策，上传文件前请自行判断。"
+                               FontSize="9.5" Foreground="{DynamicResource InkSoftBrush}" TextWrapping="Wrap"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding BuiltInLinks}" Margin="0,0,0,4">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource CardBorder}" Width="314" Margin="0,0,10,10">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="{Binding Name}" FontSize="11.5" FontWeight="SemiBold" />
+                                    <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="5"
+                                            Padding="6,2" HorizontalAlignment="Right">
+                                        <TextBlock Text="外部" FontSize="8" Foreground="{DynamicResource AccentInkBrush}" />
+                                    </Border>
+                                </Grid>
+                                <TextBlock Text="{Binding Description}" FontSize="9.5"
+                                           Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"
+                                           Margin="0,4,0,9" MinHeight="30" />
+                                <Button Style="{StaticResource SecondaryButton}" Content="打开网站"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,4,0,0">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="自定义链接" FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding StatusText}" FontSize="9.5"
+                                       Foreground="{DynamicResource MutedBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <TextBlock Text="只保存在本机 links.json" FontSize="9"
+                                   Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding CustomLinks}" Margin="0,0,0,8">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8"
+                                        Padding="10,7" Margin="0,0,0,5">
+                                    <Grid>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Url}" FontSize="9"
+                                                       Foreground="{DynamicResource MutedBrush}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center">
+                                            <Button Style="{StaticResource GhostButton}" Content="打开" FontSize="9.5"
+                                                    Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" Margin="0,0,4,0" />
+                                            <Button Style="{StaticResource CompactButton}" Content="✕" ToolTip="移除这一项" FontSize="10"
+                                                    Foreground="{DynamicResource DangerBrush}"
+                                                    Command="{Binding DataContext.RemoveLinkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.1*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="1.7*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="1.4*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="名称" />
+                        <TextBox Grid.Column="2" Style="{StaticResource InputTextBox}"
+                                 Text="{Binding NewUrl, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="https:// 开头的网址" />
+                        <TextBox Grid.Column="4" Style="{StaticResource InputTextBox}"
+                                 Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="说明（可选）" />
+                        <Button Grid.Column="6" Style="{StaticResource PrimaryButton}" Content="添加"
+                                Command="{Binding AddLinkCommand}" Margin="0,0,0,0" />
+                    </Grid>
+                    <TextBlock Text="三个输入框依次为：名称、网址（http/https）、说明（可选）。"
+                               FontSize="9" Foreground="{DynamicResource MutedBrush}" Margin="1,5,0,0" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+</UserControl>

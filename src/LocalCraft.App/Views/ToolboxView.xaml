@@ -1,0 +1,247 @@
+<UserControl x:Class="LocalCraft.App.Views.ToolboxView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:LocalCraft.App.ViewModels"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:ToolboxViewModel}">
+    <Grid AllowDrop="True" Drop="ToolboxRoot_Drop" DragOver="ToolboxRoot_DragOver">
+        <Button Style="{StaticResource GhostButton}" Content="↶ 回退中心"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,-4,0,0" Panel.ZIndex="10"
+                Command="{Binding OpenUndoCenterCommand}" />
+        <!-- 空间分析 -->
+        <StackPanel Visibility="{Binding IsSpaceActive, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="空间分析" FontSize="25" FontWeight="Bold" />
+            <TextBlock Text="只读扫描目录，找出最占空间的文件与类型；不会修改任何内容。" FontSize="11"
+                       Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,18" />
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding DiskFolder, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseDiskCommand}" Content="选择" Margin="7,0,0,0" />
+                    <Button Grid.Column="3" Style="{StaticResource PrimaryButton}" Command="{Binding ScanDiskCommand}" Content="开始分析" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="320" /></Grid.RowDefinitions>
+                    <TextBlock Text="{Binding DiskSummary}" Margin="16,12,16,8" FontSize="10" Foreground="{DynamicResource MutedBrush}" />
+                    <Grid Grid.Row="1" Margin="8,0,8,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="8" /><ColumnDefinition Width="1*" /></Grid.ColumnDefinitions>
+                        <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="6">
+                            <TreeView ItemsSource="{Binding DirNodes}" Background="Transparent" BorderThickness="0">
+                                <TreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Name}" FontSize="10.5" />
+                                            <TextBlock Text="{Binding SizeText}" FontSize="9.5" Foreground="{DynamicResource AccentBrush}" Margin="8,0,0,0" />
+                                            <TextBlock Text="{Binding FilesText}" FontSize="9" Foreground="{DynamicResource MutedBrush}" Margin="6,0,0,0" />
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                        </Border>
+                        <DataGrid Grid.Column="2" Style="{StaticResource PreviewDataGrid}" ItemsSource="{Binding DiskItems}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="最大文件" Binding="{Binding Path}" Width="*" />
+                                <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="88" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- 图片压缩 -->
+        <StackPanel Visibility="{Binding IsImageCompressActive, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="图片压缩" FontSize="25" FontWeight="Bold" />
+            <TextBlock Text="压缩到指定大小，自动降低质量并输出 JPG 副本。" FontSize="11"
+                       Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,18" />
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="10" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" /><ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding ImageFolder, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseImageFileCommand}" Content="选文件" Margin="7,0,0,0" />
+                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseImageSourceCommand}" Content="选目录" Margin="7,0,0,0" />
+                        <Button Grid.Column="4" Style="{StaticResource PrimaryButton}" Command="{Binding CompressImagesCommand}" Content="开始压缩" />
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="14" /><ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding ImageOutput, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseImageOutputCommand}" Content="输出" Margin="7,0,0,0" />
+                        <TextBlock Grid.Column="3" Text="目标 KB" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" />
+                        <TextBox Grid.Column="5" Style="{StaticResource InputTextBox}" Width="110" Text="{Binding TargetKb, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="320" /></Grid.RowDefinitions>
+                    <TextBlock Text="{Binding ImageSummary}" Margin="16,12,16,8" FontSize="10" Foreground="{DynamicResource MutedBrush}" />
+                    <DataGrid Grid.Row="1" Style="{StaticResource PreviewDataGrid}" ItemsSource="{Binding ImageItems}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="文件" Binding="{Binding File}" Width="*" />
+                            <DataGridTextColumn Header="原大小" Binding="{Binding Before}" Width="100" />
+                            <DataGridTextColumn Header="新大小" Binding="{Binding After}" Width="100" />
+                            <DataGridTextColumn Header="状态" Binding="{Binding Status}" Width="150" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- 图片检查 -->
+        <StackPanel Visibility="{Binding IsImageCheckActive, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="图片检查" FontSize="25" FontWeight="Bold" />
+            <TextBlock Text="批量解码校验图片，发现损坏或截断文件后可移入隔离区。" FontSize="11"
+                       Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,18" />
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding IntegrityFolder, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseIntegrityFileCommand}" Content="选文件" Margin="7,0,0,0" />
+                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseIntegrityCommand}" Content="选目录" Margin="7,0,0,0" />
+                    <Button Grid.Column="4" Style="{StaticResource PrimaryButton}" Command="{Binding CheckIntegrityCommand}" Content="开始检查" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="320" /></Grid.RowDefinitions>
+                    <StackPanel Margin="16,10,16,8">
+                        <TextBlock Text="{Binding IntegritySummary}" FontSize="10" Foreground="{DynamicResource MutedBrush}" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding MoveBadImagesCommand}" Content="损坏项移入隔离" HorizontalAlignment="Left" Margin="0,8,0,0" />
+                    </StackPanel>
+                    <DataGrid Grid.Row="1" Style="{StaticResource PreviewDataGrid}" ItemsSource="{Binding BadImages}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="文件" Binding="{Binding Path}" Width="*" />
+                            <DataGridTextColumn Header="问题" Binding="{Binding Reason}" Width="220" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- 内嵌图片 -->
+        <StackPanel Visibility="{Binding IsEmbeddedActive, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="内嵌图片提取" FontSize="25" FontWeight="Bold" />
+            <TextBlock Text="从 DOCX/XLSX/PPTX 提取媒体文件；PDF 提取可识别的内嵌 JPEG。" FontSize="11"
+                       Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,18" />
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="10" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" /><ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding OfficeFolder, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseOfficeFileCommand}" Content="选文件" Margin="7,0,0,0" />
+                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseOfficeCommand}" Content="选目录" Margin="7,0,0,0" />
+                        <Button Grid.Column="4" Style="{StaticResource PrimaryButton}" Command="{Binding ExtractOfficeCommand}" Content="提取图片" />
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding OfficeOutput, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseOfficeOutputCommand}" Content="输出" Margin="7,0,0,0" />
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="300" /></Grid.RowDefinitions>
+                    <TextBlock Text="{Binding OfficeSummary}" Margin="16,12,16,8" FontSize="10" Foreground="{DynamicResource MutedBrush}" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding OfficeResults}" Background="Transparent" BorderThickness="0" Margin="8,0,8,8" />
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- 批量快捷方式 -->
+        <StackPanel Visibility="{Binding IsShortcutActive, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="批量快捷方式" FontSize="25" FontWeight="Bold" />
+            <TextBlock Text="为目录内的文件或文件夹批量创建 .lnk 快捷方式。" FontSize="11"
+                       Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,18" />
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="10" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding ShortcutFolder, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseShortcutCommand}" Content="目标目录" Margin="7,0,0,0" />
+                        <Button Grid.Column="3" Style="{StaticResource PrimaryButton}" Command="{Binding CreateShortcutsCommand}" Content="创建快捷方式" />
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource InputTextBox}" Text="{Binding ShortcutOutput, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseShortcutOutputCommand}" Content="输出" Margin="7,0,0,0" />
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="300" /></Grid.RowDefinitions>
+                    <TextBlock Text="{Binding ShortcutSummary}" Margin="16,12,16,8" FontSize="10" Foreground="{DynamicResource MutedBrush}" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding ShortcutResults}" Background="Transparent" BorderThickness="0" Margin="8,0,8,8" />
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- 标签备注 -->
+        <StackPanel Visibility="{Binding IsTagsActive, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="标签备注" FontSize="25" FontWeight="Bold" />
+            <TextBlock Text="为文件保存本地标签与备注，可按名称、标签或备注筛选。" FontSize="11"
+                       Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,18" />
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="14" /><ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding TagFolder, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseTagFileCommand}" Content="选文件" Margin="7,0,0,0" />
+                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Command="{Binding BrowseTagFolderCommand}" Content="选目录" Margin="7,0,0,0" />
+                    <TextBox Grid.Column="4" Style="{StaticResource InputTextBox}" Text="{Binding TagFilter, UpdateSourceTrigger=PropertyChanged}" ToolTip="按标签、备注或文件名筛选" />
+                    <Button Grid.Column="6" Style="{StaticResource PrimaryButton}" Command="{Binding LoadTagsCommand}" Content="载入" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="320" /></Grid.RowDefinitions>
+                    <TextBlock Text="{Binding TagSummary}" Margin="16,12,16,8" FontSize="10" Foreground="{DynamicResource MutedBrush}" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding TagItems}" SelectedItem="{Binding SelectedTag, Mode=TwoWay}"
+                             Background="Transparent" BorderThickness="0" Margin="8,0,8,8">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4,5">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="140" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Tag}" Foreground="{DynamicResource AccentBrush}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="150" /><ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" /><ColumnDefinition Width="10" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource InputTextBox}" Text="{Binding EditTag, UpdateSourceTrigger=PropertyChanged}" ToolTip="标签" />
+                    <TextBox Grid.Column="2" Style="{StaticResource InputTextBox}" Text="{Binding EditNote, UpdateSourceTrigger=PropertyChanged}" ToolTip="备注" />
+                    <Button Grid.Column="4" Style="{StaticResource PrimaryButton}" Command="{Binding SaveTagCommand}" Content="保存" />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>
