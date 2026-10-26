@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-11.0.1-4F46E5" />
+  <img alt="version" src="https://img.shields.io/badge/version-11.0.3-4F46E5" />
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-0EA5E9" />
   <img alt="dotnet" src="https://img.shields.io/badge/.NET-8-512BD4" />
   <img alt="license" src="https://img.shields.io/badge/license-MIT-22C55E" />
@@ -84,7 +84,7 @@ Locifab 是一个面向普通用户与小型团队的 **Windows 离线文件工�
 
 ### 设置与作者入口
 
-![设置与作者](docs/screenshots/v11-settings-author.png)
+![设置与作者](docs/screenshots/v11-author-card.png)
 
 ### 离线自检
 

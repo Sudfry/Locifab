@@ -9,9 +9,9 @@
     <ApplicationIcon>Assets\Locifab.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <StartupObject>LocalCraft.App.Program</StartupObject>
-    <Version>11.0.1</Version>
-    <AssemblyVersion>11.0.1.0</AssemblyVersion>
-    <FileVersion>11.0.1.0</FileVersion>
+    <Version>11.0.3</Version>
+    <AssemblyVersion>11.0.3.0</AssemblyVersion>
+    <FileVersion>11.0.3.0</FileVersion>
     <AssemblyTitle>Locifab 本地文件工具</AssemblyTitle>
     <Description>完全离线的本地文件处理工具</Description>
     <Company>Sudfry</Company>

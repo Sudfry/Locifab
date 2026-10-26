@@ -500,24 +500,66 @@
             </Border>
 
             <!-- About / author -->
-            <Border Style="{StaticResource CardBorder}" Margin="0,12,0,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="关于作者" FontSize="13" FontWeight="SemiBold" />
-                        <TextBlock Text="Sudfry · Locifab 开源仓库" FontSize="10.5"
-                                   Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0" />
-                        <TextBlock Text="https://github.com/Sudfry/Locifab" FontSize="10"
-                                   Foreground="{DynamicResource AccentBrush}" Margin="0,3,0,0" />
-                    </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
-                            Command="{Binding OpenGithubCommand}" Content="打开 GitHub"
-                            VerticalAlignment="Center" />
-                </Grid>
-            </Border>
+            <Button Command="{Binding OpenGithubCommand}" Cursor="Hand" Focusable="False"
+                    Margin="0,12,0,0" HorizontalContentAlignment="Stretch">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="AuthorCard" Background="{DynamicResource CardBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                CornerRadius="16" Padding="16,14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="44" Height="44" CornerRadius="12"
+                                        Background="{DynamicResource AccentSoftBrush}">
+                                    <TextBlock Text="GH" FontSize="12" FontWeight="Bold"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Sudfry" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource InkBrush}" />
+                                    <TextBlock Text="Locifab · 开源仓库" FontSize="10"
+                                               Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
+                                    <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="7"
+                                            Padding="8,4" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="GitHub" FontSize="9" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AccentInkBrush}"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="github.com/Sudfry/Locifab" FontSize="9"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       Margin="7,0,0,0" VerticalAlignment="Center" />
+                                            <Path Data="M 4,12 L 12,4 M 7,4 H 12 V 9" Width="9" Height="9"
+                                                  Stretch="Uniform" Stroke="{DynamicResource AccentBrush}"
+                                                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                  Margin="7,0,0,0" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <Border Grid.Column="2" Width="30" Height="30" CornerRadius="9"
+                                        Background="{DynamicResource SurfaceMutedBrush}" VerticalAlignment="Center">
+                                    <Path Data="M 8,20 L 20,8 M 12,8 H 20 V 16"
+                                          Width="15" Height="15" Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="AuthorCard" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                <Setter TargetName="AuthorCard" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

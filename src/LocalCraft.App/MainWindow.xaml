@@ -10,7 +10,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
-        Title="Locifab 11.0.1 · 本地文件工坊"
+        Title="Locifab 11.0.3 · 本地文件工坊"
         Width="1320" Height="820"
         MinWidth="640" MinHeight="420"
         WindowStartupLocation="CenterScreen"
@@ -568,7 +568,7 @@
                                    FontSize="9.5"
                                    Foreground="{DynamicResource SidebarMutedBrush}"
                                    Margin="0,5,0,0" />
-                        <TextBlock Text="v11.0.1  ·  Sudfry · 完全离线"
+                        <TextBlock Text="v11.0.3  ·  Sudfry · 完全离线"
                                    FontSize="9"
                                    Foreground="{DynamicResource SidebarMutedBrush}"
                                    Margin="0,8,0,0" />
