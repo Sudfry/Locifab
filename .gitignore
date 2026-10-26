@@ -52,3 +52,7 @@ corrupt_lines.txt
 
 # Legacy test data
 测试数据/
+
+# Prepared upload artifacts
+dist-upload/*.zip
+dist-upload/*.bundle
