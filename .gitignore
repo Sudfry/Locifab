@@ -49,3 +49,6 @@ tests/测试数据-10.1.17/**
 # Personal documents
 Document/
 corrupt_lines.txt
+
+# Legacy test data
+测试数据/
