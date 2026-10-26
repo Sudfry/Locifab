@@ -301,6 +301,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish-win-x64.ps
 publish\win-x64\Locifab.exe
 ```
 
+### MSIX（Microsoft Store）
+
+```powershell
+dotnet publish .\src\LocalCraft.App\LocalCraft.App.csproj `
+  -c Release -r win-x64 --self-contained true `
+  -p:PublishSingleFile=false -p:PublishTrimmed=false `
+  -o .\publish\msix-x64
+
+powershell -ExecutionPolicy Bypass -File .\msix\build-msix.ps1
+```
+
+- 包：`msix/Locifab-11.0.3.msix`
+- 指南：`msix/STORE-发布指南.md`
+- 检测：`msix/检测报告.md`
+- 提交 Store 前必须替换 Partner Center 的 Identity 与 Publisher。
+
 ### 发布参数
 
 - `PublishSingleFile=true`

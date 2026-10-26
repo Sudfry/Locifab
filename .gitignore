@@ -56,3 +56,12 @@ corrupt_lines.txt
 # Prepared upload artifacts
 dist-upload/*.zip
 dist-upload/*.bundle
+
+# MSIX generated layout and signing material
+msix/layout/
+msix/unpacked/
+msix/extract/
+msix/*.msix
+msix/*.pfx
+msix/*.cer
+publish/msix-x64/
