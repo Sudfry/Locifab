@@ -61,6 +61,7 @@ Locifab 是一个面向普通用户与小型团队的 **Windows 离线文件工�
 - 不调用 AI / 外部 API
 - 不需要安装 .NET 运行时
 - 单个 `Locifab.exe` 复制到 U 盘即可运行
+- 使用Deepseek Harness制作
 
 ---
 
