@@ -450,6 +450,10 @@ public sealed class PipelineViewModel : ViewModelBase
 
     private readonly JournalRepository _repository;
     private readonly ToolPresetStore _presetStore = new();
+
+    /// <summary>模板名 → 它所在的文件路径。删除、覆盖、刷新时用。</summary>
+    private readonly Dictionary<string, string> _presetFiles = new(StringComparer.OrdinalIgnoreCase);
+
     private readonly IDialogService _dialogService;
     private readonly ArchivePlanner _archivePlanner = new();
     private readonly ArchiveExecutor _archiveExecutor;
@@ -485,6 +489,7 @@ public sealed class PipelineViewModel : ViewModelBase
         var engines = new ConversionEngineCatalog();
         _conversionPlanner = new ConversionPlanner(engines);
         _conversionExecutor = new ConversionExecutor(repository, engines);
+        PresetDir = Path.Combine(repository.DataRoot, "流水线模板");
         PresetPath = Path.Combine(repository.DataRoot, "pipeline-presets.json");
 
         StepKinds = new ObservableCollection<PipelineStepKindOption>
@@ -518,8 +523,12 @@ public sealed class PipelineViewModel : ViewModelBase
         ExecuteCommand = new AsyncRelayCommand(ExecuteAsync, () => CanExecute);
         SavePresetCommand = new RelayCommand(SavePreset, () => !IsBusy && !string.IsNullOrWhiteSpace(PresetName));
         DeletePresetCommand = new RelayCommand(DeletePreset, () => !IsBusy && SelectedPreset is not null);
+        ImportPresetFileCommand = new RelayCommand(ImportPresetFile);
+        OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
+        RefreshPresetsCommand = new RelayCommand(RefreshPresets);
         OpenUndoCenterCommand = new RelayCommand(() => UndoCenterRequested?.Invoke(this, EventArgs.Empty));
         LoadPresets();
+        EnsureDemoPipelines();
         LoadImportablePresets();
         if (Presets.Count > 0) SelectedPreset = Presets[0];
         ImportPresetCommand = new RelayCommand(() =>
@@ -541,6 +550,9 @@ public sealed class PipelineViewModel : ViewModelBase
     public AsyncRelayCommand ExecuteCommand { get; }
     public RelayCommand SavePresetCommand { get; }
     public RelayCommand DeletePresetCommand { get; }
+    public RelayCommand ImportPresetFileCommand { get; }
+    public RelayCommand OpenPresetFolderCommand { get; }
+    public RelayCommand RefreshPresetsCommand { get; }
     public RelayCommand OpenUndoCenterCommand { get; }
     public ObservableCollection<ToolImportGroup> ImportToolGroups { get; } = new();
     public ObservableCollection<ToolPreset> ImportToolPresets { get; } = new();
@@ -567,6 +579,20 @@ public sealed class PipelineViewModel : ViewModelBase
             ImportPresetCommand?.RaiseCanExecuteChanged();
         }
     }
+    /// <summary>
+    /// 流水线模板所在的文件夹。
+    ///
+    /// 11.1.0 起模板改成「一个模板一个文件」，全部放在这个目录里：
+    ///   · 用户能直接打开文件夹看到有哪些模板，也能拿到单个 .json 去分享
+    ///   · 备份 = 复制文件夹；分享 = 发一个文件；导入 = 把文件拖进来
+    ///
+    /// 旧版本把所有模板塞在一个 pipeline-presets.json 里，那个文件
+    /// 用户既看不懂也不敢删，而且删一个模板会影响整个文件。
+    /// 首次启动会自动把旧文件拆成单个模板文件，并把旧文件改名备份。
+    /// </summary>
+    public string PresetDir { get; }
+
+    /// <summary>旧版的单文件路径，只在迁移时用到。</summary>
     public string PresetPath { get; }
 
     public PipelineStepKindOption SelectedStepKind
@@ -1634,7 +1660,7 @@ public sealed class PipelineViewModel : ViewModelBase
     private OperationJournal NewJournal(string kind, string source, string target) => new()
     {
         Id = Guid.NewGuid().ToString("N"),
-        Kind = kind,
+        Kind = kind.ToString(),
         DisplayName = "流水线输出",
         SourceDirectory = source,
         CreatedAt = DateTimeOffset.Now,
@@ -1658,41 +1684,233 @@ public sealed class PipelineViewModel : ViewModelBase
             Steps = Steps.Select(x => x.ToData()).ToList()
         };
         var existing = Presets.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-        if (existing is not null) Presets.Remove(existing);
+        if (existing is not null)
+        {
+            Presets.Remove(existing);
+            DeletePresetFile(existing.Name);   /* 同名模板被覆盖，旧文件先删掉 */
+        }
         Presets.Add(preset);
-        WritePresets();
+        SavePresetFile(preset);                /* 一个模板一个文件，立刻落盘 */
         SelectedPreset = preset;
-        SummaryText = "模板已保存到本机。";
+        SummaryText = $"模板已保存：{SafeFileName(name)}.json（在「流水线模板」文件夹里）";
     }
 
     private void DeletePreset()
     {
         if (SelectedPreset is null) return;
-        Presets.Remove(SelectedPreset);
+        var victim = SelectedPreset;
+        Presets.Remove(victim);
         SelectedPreset = null;
-        WritePresets();
-        SummaryText = "模板已删除。";
+        DeletePresetFile(victim.Name);         /* 只删这一个文件，不碰其它模板 */
+        SummaryText = "模板已删除（对应的 .json 文件也一起删掉了）。";
     }
+
+    private void ImportPresetFile()
+    {
+        var files = _dialogService.PickFiles("流水线模板|*.json|所有文件|*.*", null);
+        if (files.Count == 0) return;
+        try
+        {
+            string json = File.ReadAllText(files[0]);
+            var imported = new List<PipelinePreset>();
+            using (var document = JsonDocument.Parse(json))
+            {
+                if (document.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    imported = JsonSerializer.Deserialize<List<PipelinePreset>>(json, JsonOptions) ?? new();
+                }
+                else
+                {
+                    var one = JsonSerializer.Deserialize<PipelinePreset>(json, JsonOptions);
+                    if (one is not null) imported.Add(one);
+                }
+            }
+            int added = 0;
+            foreach (var preset in imported)
+            {
+                if (string.IsNullOrWhiteSpace(preset.Name) || preset.Steps.Count == 0) continue;
+                string name = preset.Name.Trim();
+                if (Presets.Any(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)))
+                    name = name + "（导入）";
+                preset.Name = name;
+                Presets.Add(preset);
+                added++;
+            }
+            if (added == 0)
+            {
+                _dialogService.ShowError("没有可导入的模板", "文件中没有有效的流水线模板。");
+                return;
+            }
+            foreach (var p in Presets) if (!_presetFiles.ContainsKey(p.Name)) SavePresetFile(p);
+            SelectedPreset = Presets[^1];
+            SummaryText = $"已导入 {added} 套流水线模板，选择后即可预览和执行。";
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError("导入流水线模板失败", ex.Message);
+        }
+    }
+
+    private void EnsureDemoPipelines()
+    {
+        var demos = new[]
+        {
+            DemoPreset("交付整理-全流程", new[]
+            {
+                DemoStep(PipelineStepKind.Classify, choice:"ByType"),
+                DemoStep(PipelineStepKind.Rename, "交付_", "", "_", 1, 3, "", true),
+                DemoStep(PipelineStepKind.ImageCheck, "损坏图片隔离"),
+                DemoStep(PipelineStepKind.ImageTarget, "压缩图片", "", "", 500),
+                DemoStep(PipelineStepKind.Report, "交付清单.csv", choice:"Csv", b1:true),
+                DemoStep(PipelineStepKind.Cleanup, b1:true, b2:true),
+                DemoStep(PipelineStepKind.Archive, "交付包.zip", choice:"Compress", b1:true),
+            }),
+            DemoPreset("文档隐私交付（演示）", new[]
+            {
+                DemoStep(PipelineStepKind.Metadata, "去元数据"),
+                DemoStep(PipelineStepKind.Convert, "PDF", choice:"pdf"),
+                DemoStep(PipelineStepKind.Checksum, "Locifab-SHA256.txt", choice:"SHA-256"),
+                DemoStep(PipelineStepKind.Report, "文档清单.csv", choice:"Csv", b1:true),
+            }),
+            DemoPreset("客户资料归档（演示）", new[]
+            {
+                DemoStep(PipelineStepKind.Template, "客户/|合同/|交付物/|验收/|交付说明.md"),
+                DemoStep(PipelineStepKind.Classify, choice:"ByYear"),
+                DemoStep(PipelineStepKind.Rename, "归档_", "", "_", 1, 3, "", true),
+                DemoStep(PipelineStepKind.Report, "归档清单.csv", choice:"Csv", b1:true),
+            }),
+        };
+        bool added = false;
+        foreach (var preset in demos)
+        {
+            if (Presets.Any(x => string.Equals(x.Name, preset.Name, StringComparison.OrdinalIgnoreCase))) continue;
+            Presets.Add(preset);
+            added = true;
+        }
+        if (added) WritePresets();
+    }
+
+    private static PipelinePreset DemoPreset(string name, PipelineStepData[] steps)
+        => new() { Name = name, Steps = steps.ToList() };
+
+    private static PipelineStepData DemoStep(PipelineStepKind kind, string text1="", string text2="", string text3="",
+        int n1=0, int n2=0, string choice="", bool b1=false, bool b2=false)
+        => new()
+        {
+            Kind = kind.ToString(), Name = kind.ToString(), Enabled = true,
+            Text1 = text1, Text2 = text2, Text3 = text3,
+            Number1 = n1, Number2 = n2, Choice = choice, Bool1 = b1, Bool2 = b2
+        };
 
     private void LoadPresets()
     {
         try
         {
-            if (File.Exists(PresetPath))
+            Directory.CreateDirectory(PresetDir);
+            MigrateLegacyPresetFile();
+
+            /*
+             * 一个模板一个文件，文件名就是模板名。
+             *
+             * 用文件名当名字、而不是信任 JSON 里的 Name 字段，
+             * 是为了让「用户改文件名」这件事真的生效 —— 改完刷新一下就改名了。
+             * 但 JSON 里如果写了 Name 且和文件名不同，仍以 JSON 为准（那是模板自己的身份），
+             * 只是文件路径记下来供删除时用。
+             */
+            foreach (var file in Directory.EnumerateFiles(PresetDir, "*.json").OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
             {
-                var presets = JsonSerializer.Deserialize<List<PipelinePreset>>(File.ReadAllText(PresetPath), JsonOptions) ?? new();
-                foreach (var preset in presets.Where(x => !string.IsNullOrWhiteSpace(x.Name))) Presets.Add(preset);
+                try
+                {
+                    var preset = JsonSerializer.Deserialize<PipelinePreset>(File.ReadAllText(file), JsonOptions);
+                    if (preset is null) continue;
+                    if (string.IsNullOrWhiteSpace(preset.Name))
+                        preset.Name = Path.GetFileNameWithoutExtension(file);
+                    if (string.IsNullOrWhiteSpace(preset.Name) || preset.Steps.Count == 0) continue;
+                    if (Presets.Any(x => string.Equals(x.Name, preset.Name, StringComparison.OrdinalIgnoreCase))) continue;
+                    _presetFiles[preset.Name] = file;
+                    Presets.Add(preset);
+                }
+                catch { /* 单个文件坏了不影响其它模板 */ }
             }
+
             bool added = false;
             foreach (var (name, kinds) in BuiltInPresets())
             {
                 if (Presets.Any(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase))) continue;
-                Presets.Add(DefaultPreset(name, kinds));
+                var preset = DefaultPreset(name, kinds);
+                Presets.Add(preset);
+                SavePresetFile(preset);
                 added = true;
             }
-            if (added) WritePresets();
+            if (added) { /* 已经逐个写盘了 */ }
         }
         catch { }
+    }
+
+    /// <summary>
+    /// 把旧的单文件模板库拆成单个文件。
+    ///
+    /// 只在旧文件存在时做一次；做完把旧文件改名成 .bak 留在原地，
+    /// 不直接删 —— 万一拆分过程中出错，用户的模板还在。
+    /// </summary>
+    private void MigrateLegacyPresetFile()
+    {
+        try
+        {
+            if (!File.Exists(PresetPath)) return;
+
+            var presets = JsonSerializer.Deserialize<List<PipelinePreset>>(File.ReadAllText(PresetPath), JsonOptions);
+            if (presets is not null)
+            {
+                foreach (var preset in presets.Where(x => !string.IsNullOrWhiteSpace(x.Name) && x.Steps.Count > 0))
+                    SavePresetFile(preset);
+            }
+            File.Move(PresetPath, PresetPath + ".bak", true);
+        }
+        catch { }
+    }
+
+    /// <summary>把一个模板写到自己的文件里。文件名 = 模板名（去掉非法字符）。</summary>
+    private void SavePresetFile(PipelinePreset preset)
+    {
+        try
+        {
+            Directory.CreateDirectory(PresetDir);
+            string file = Path.Combine(PresetDir, SafeFileName(preset.Name) + ".json");
+            File.WriteAllText(file, JsonSerializer.Serialize(preset, JsonOptions), new UTF8Encoding(false));
+            _presetFiles[preset.Name] = file;
+        }
+        catch { }
+    }
+
+    private void DeletePresetFile(string name)
+    {
+        try
+        {
+            if (_presetFiles.TryGetValue(name, out var file) && File.Exists(file))
+                File.Delete(file);
+            _presetFiles.Remove(name);
+        }
+        catch { }
+    }
+
+    /// <summary>模板名要当文件名用，把 Windows 不允许的字符换掉。</summary>
+    private static string SafeFileName(string name)
+    {
+        var sb = new StringBuilder(name.Length);
+        foreach (char c in name.Trim())
+        {
+            bool bad = c < 32 || "\\/:*?\"<>|".IndexOf(c) >= 0;
+            sb.Append(bad ? '_' : c);
+        }
+        string s = sb.ToString().Trim().TrimEnd('.');
+        if (s.Length == 0) s = "模板";
+        if (s.Length > 100) s = s.Substring(0, 100);
+        // 避免和系统保留名冲突
+        string[] reserved = { "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "LPT1", "LPT2", "LPT3" };
+        foreach (var r in reserved)
+            if (string.Equals(s, r, StringComparison.OrdinalIgnoreCase)) s = "_" + s;
+        return s;
     }
 
     private static IEnumerable<(string Name, PipelineStepKind[] Kinds)> BuiltInPresets()
@@ -1717,16 +1935,59 @@ public sealed class PipelineViewModel : ViewModelBase
         return preset;
     }
 
+    /// <summary>
+    /// 确保每个模板都有自己独立的文件。
+    ///
+    /// 11.1.0 之前这里是「把整个列表写进一个 pipeline-presets.json」。
+    /// 改成文件夹之后保留这个方法名（调用点很多），但语义变成了
+    /// 「逐个模板写各自的 .json」—— 不再存在那个大文件。
+    /// </summary>
     private void WritePresets()
+    {
+        foreach (var preset in Presets) SavePresetFile(preset);
+    }
+
+
+    /// <summary>打开模板文件夹 —— 用户要能看到那些 .json 到底在哪。</summary>
+    private void OpenPresetFolder()
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(PresetPath) ?? string.Empty);
-            File.WriteAllText(PresetPath, JsonSerializer.Serialize(Presets.ToList(), JsonOptions), new UTF8Encoding(false));
+            Directory.CreateDirectory(PresetDir);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = PresetDir,
+                UseShellExecute = true
+            });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError("打不开模板文件夹", ex.Message + Environment.NewLine + Environment.NewLine + PresetDir);
+        }
     }
 
+    /// <summary>
+    /// 重新扫一遍模板文件夹。
+    ///
+    /// 用户可能直接把 .json 拖进文件夹、或者删掉/改名了某个文件，
+    /// 这时候不需要重启程序，点刷新就行。
+    /// </summary>
+    private void RefreshPresets()
+    {
+        var keep = string.Empty;
+        if (SelectedPreset is not null) keep = SelectedPreset.Name;
+
+        Presets.Clear();
+        _presetFiles.Clear();
+        LoadPresets();
+        EnsureDemoPipelines();
+
+        if (keep.Length > 0)
+            SelectedPreset = Presets.FirstOrDefault(x => string.Equals(x.Name, keep, StringComparison.OrdinalIgnoreCase));
+        if (SelectedPreset is null && Presets.Count > 0) SelectedPreset = Presets[0];
+
+        SummaryText = $"已刷新：模板文件夹里共 {Presets.Count} 套模板。";
+    }
     private void ClearPreview() { PreviewSteps.Clear(); HasPreview = false; }
     private void RaiseCommands() { BrowseSourceCommand.RaiseCanExecuteChanged(); BrowseOutputCommand.RaiseCanExecuteChanged(); AddStepCommand.RaiseCanExecuteChanged(); PreviewCommand.RaiseCanExecuteChanged(); ExecuteCommand.RaiseCanExecuteChanged(); }
     private static string DefaultOutput(string source) => Path.Combine(Path.GetDirectoryName(source) ?? source, Path.GetFileName(source) + "_pipeline");

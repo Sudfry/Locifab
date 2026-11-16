@@ -204,7 +204,7 @@
             <Border Grid.Column="2" Style="{StaticResource CardBorder}">
                 <StackPanel>
                     <TextBlock Text="模板 / 预设" FontSize="12" FontWeight="SemiBold" />
-                    <TextBlock Text="保存步骤顺序和每一步的参数。" FontSize="9"
+                    <TextBlock Text="一个模板一个 .json 文件，放在「流水线模板」文件夹里。" FontSize="9"
                                Foreground="{DynamicResource MutedBrush}" Margin="0,2,0,9" />
                     <ComboBox Style="{StaticResource InputComboBox}" ItemsSource="{Binding Presets}"
                               SelectedItem="{Binding SelectedPreset, Mode=TwoWay}">
@@ -218,14 +218,30 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBox Style="{StaticResource InputTextBox}" Text="{Binding PresetName, UpdateSourceTrigger=PropertyChanged}"
-                                 ToolTip="模板名称" />
+                                 ToolTip="模板名称（也就是文件夹里的文件名）" />
                         <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding SavePresetCommand}"
                                 Content="保存" Margin="6,0,0,0" />
                     </Grid>
                     <Button Style="{StaticResource CompactButton}" Command="{Binding DeletePresetCommand}"
-                            Content="✕ 删除模板" HorizontalAlignment="Left" Margin="0,6,0,0" ToolTip="删除当前模板" />
-                    <TextBlock Text="模板只保存在本机，不联网。" FontSize="8.5"
+                            Content="✕ 删除模板" HorizontalAlignment="Left" Margin="0,6,0,0"
+                            ToolTip="删除当前模板（同时删掉文件夹里对应的 .json）" />
+                    <UniformGrid Columns="2" Margin="0,6,0,0">
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding ImportPresetFileCommand}"
+                                Content="导入模板文件" Margin="0,0,3,0"
+                                ToolTip="把 .json 模板导入到模板文件夹，支持单套或数组" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding OpenPresetFolderCommand}"
+                                Content="打开模板文件夹" Margin="3,0,0,0"
+                                ToolTip="在资源管理器里打开「流水线模板」文件夹" />
+                    </UniformGrid>
+                    <Button Style="{StaticResource CompactButton}" Command="{Binding RefreshPresetsCommand}"
+                            Content="↻ 刷新模板列表" HorizontalAlignment="Left" Margin="0,6,0,0"
+                            ToolTip="把 .json 拖进文件夹后，点这里重新读取" />
+                    <TextBlock Text="{Binding PresetDir, StringFormat=模板文件夹：{0}}" FontSize="8"
+                               TextTrimming="CharacterEllipsis"
                                Foreground="{DynamicResource MutedBrush}" Margin="0,8,0,0" />
+                    <TextBlock Text="模板只保存在本机，不联网。文件夹可以直接复制备份或分享给他人。"
+                               FontSize="8.5" TextWrapping="Wrap"
+                               Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0" />
                     <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Margin="0,10,0,0" Padding="0,10,0,0">
                         <StackPanel>
                             <TextBlock Text="导入功能配置" FontSize="11" FontWeight="SemiBold" />
