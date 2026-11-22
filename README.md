@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-11.0.3-4F46E5" />
+  <img alt="version" src="https://img.shields.io/badge/version-11.1.0-4F46E5" />
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-0EA5E9" />
   <img alt="dotnet" src="https://img.shields.io/badge/.NET-8-512BD4" />
   <img alt="license" src="https://img.shields.io/badge/license-MIT-22C55E" />
@@ -312,7 +312,7 @@ dotnet publish .\src\LocalCraft.App\LocalCraft.App.csproj `
 powershell -ExecutionPolicy Bypass -File .\msix\build-msix.ps1
 ```
 
-- 包：`msix/Locifab-11.0.3.msix`
+- 包：`msix/Locifab-Store-11.1.0.msix`
 - 指南：`msix/STORE-发布指南.md`
 - 检测：`msix/检测报告.md`
 - 提交 Store 前必须替换 Partner Center 的 Identity 与 Publisher。

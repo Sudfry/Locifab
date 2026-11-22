@@ -1,7 +1,7 @@
 # Locifab MSIX · Microsoft Store 发布指南
 
-- 包：`Locifab-11.0.3.msix`
-- 版本：`11.0.3.0`
+- 包：`Locifab-Store-11.1.0.msix`
+- 版本：`11.1.0.0`
 - 架构：x64
 - 类型：完整信任 Win32 桌面应用（Full Trust）
 - 能力：`runFullTrust`
@@ -36,8 +36,8 @@
 ```xml
 <Identity
     Name="Sudfry.Locifab"
-    Publisher="CN=Sudfry"
-    Version="11.0.3.0"
+    Publisher="CN=87A5EDEF-7F2A-4A2A-8B4C-18D208E241CB"
+    Version="11.1.0.0"
     ProcessorArchitecture="x64" />
 ```
 
@@ -75,10 +75,10 @@ powershell -ExecutionPolicy Bypass -File .\msix\build-msix.ps1
 powershell -ExecutionPolicy Bypass -File .\msix\build-msix.ps1 `
   -PackageName "PartnerCenter.Identity.Name" `
   -Publisher "CN=PartnerCenter.Publisher" `
-  -Version "11.0.3.0" `
+  -Version "11.1.0.0" `
   -CertPath "C:\path\store-signing.pfx" `
   -CertPassword "证书密码" `
-  -Output "Locifab-Store-11.0.3.msix"
+  -Output "Locifab-Store-11.1.0.msix"
 ```
 
 ---
@@ -109,7 +109,7 @@ certutil -addstore Root .\msix\Locifab-Test.cer
 然后安装：
 
 ```powershell
-Add-AppxPackage .\msix\Locifab-11.0.3.msix
+Add-AppxPackage .\msix\Locifab-Store-11.1.0.msix
 ```
 
 ---
@@ -120,7 +120,7 @@ Add-AppxPackage .\msix\Locifab-11.0.3.msix
 2. 创建新应用，保留应用名称 `Locifab`。
 3. 进入 **Packages**，记录 Identity Name 与 Publisher。
 4. 用这两个值重新打包并签名。
-5. 上传 `Locifab-Store-11.0.3.msix`。
+5. 上传 `Locifab-Store-11.1.0.msix`。
 6. 填写：
    - 应用名称：Locifab 本地文件工坊
    - 分类：Utilities & tools
@@ -191,6 +191,6 @@ certutil -addstore Root .\msix\Locifab-Test.cer
 包无法打开，通常是清单/签名/文件缺失。重新运行：
 
 ```powershell
-makeappx unpack /p Locifab-11.0.3.msix /d unpacked
-signtool verify /pa /v Locifab-11.0.3.msix
+makeappx unpack /p Locifab-Store-11.1.0.msix /d unpacked
+signtool verify /pa /v Locifab-Store-11.1.0.msix
 ```

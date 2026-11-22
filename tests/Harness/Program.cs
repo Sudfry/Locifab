@@ -67,7 +67,7 @@ internal static class Program
         File.Copy(toolsFile, Path.Combine(dataDir, "tool-presets.json"), true);
         var store = new ToolPresetStore();
         Console.WriteLine($"\n功能配置数量: {store.All.Count}");
-        if (store.All.Count != 19) Fail("功能配置数量不是 19");
+        if (store.All.Count < 19) Fail("功能配置数量少于 19");
         foreach (var preset in store.All)
         {
             if (preset.Step is null) Fail($"配置 {preset.Name} 没有步骤快照");

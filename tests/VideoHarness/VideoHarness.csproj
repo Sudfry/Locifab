@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Locifab">
+      <HintPath>..\..\src\LocalCraft.App\bin\Release\net8.0-windows\win-x64\Locifab.dll</HintPath>
+    </Reference>
+    <Reference Include="LocalCraft.Core">
+      <HintPath>..\..\src\LocalCraft.Core\bin\Release\net8.0\LocalCraft.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="LocalCraft.Conversion">
+      <HintPath>..\..\src\LocalCraft.Conversion\bin\Release\net8.0-windows\win-x64\LocalCraft.Conversion.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

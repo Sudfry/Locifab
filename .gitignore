@@ -67,3 +67,17 @@ msix/*.cer
 publish/msix-x64/
 
 msix/unpacked-final/
+
+# Video demo data
+视频演示数据-11.0.3/
+Locifab-视频演示数据-*.zip
+
+# Generated test/demo artifacts
+docs/main_extract.txt
+msix/store-check/
+msix/unpacked-11.1/
+tests/import-harness-data/
+tests/video-harness-data/
+tests/video-harness-output/
+视频演示数据-11.1.0/
+Locifab-视频演示数据-*.zip

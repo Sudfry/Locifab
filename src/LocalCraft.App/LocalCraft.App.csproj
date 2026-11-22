@@ -25,7 +25,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LocalCraft.Core\LocalCraft.Core.csproj" />
-    <ProjectReference Include="..\LocalCraft.Conversion\LocalCraft.Conversion.csproj" />
+    <Reference Include="LocalCraft.Conversion">
+      <HintPath>..\LocalCraft.Conversion\bin\Release\net8.0-windows\win-x64\LocalCraft.Conversion.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>
